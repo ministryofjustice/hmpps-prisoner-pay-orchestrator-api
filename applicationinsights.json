@@ -1,6 +1,6 @@
 {
   "role": {
-    "name": "hmpps-template-kotlin"
+    "name": "hmpps-prisoner-pay-orchestrator-api"
   },
   "customDimensions": {
     "service.version": "${BUILD_NUMBER}"
