@@ -1,17 +1,8 @@
 version: "3"
 services:
-  db:
-    image: postgres:latest
-    networks:
-      - hmpps
-    container_name: prisoner-pay-api-db
-    restart: always
-    ports:
-      - "15432:5432"
-    environment:
-      POSTGRES_DB: prisoner-pay-api-db
-      POSTGRES_USER: prisoner-pay-api
-      POSTGRES_PASSWORD: prisoner-pay-api
+  hmpps-prisoner-pay-orchestrator-api:
+    build:
+      context: .
 
 networks:
   hmpps:
