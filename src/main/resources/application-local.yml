@@ -1,4 +1,8 @@
+server.port: 8081
+
 api:
   base:
     url:
       hmpps-auth: https://sign-in-dev.hmpps.service.justice.gov.uk/auth
+      prisoner-pay-api: http://localhost:8080
+      prisoner-search: https://prisoner-search-dev.prison.service.justice.gov.uk

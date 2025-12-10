@@ -9,3 +9,5 @@ api:
   base:
     url:
       hmpps-auth: http://localhost:8090/auth
+      prisoner-pay-api: http://localhost:8762
+      prisoner-search: http://localhost:8092
