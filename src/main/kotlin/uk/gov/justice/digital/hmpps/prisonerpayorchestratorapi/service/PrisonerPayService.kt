@@ -1,6 +1,5 @@
 package uk.gov.justice.digital.hmpps.prisonerpayorchestratorapi.service
 
-import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -23,7 +22,7 @@ class PrisonerPayService(
 
     val prisonerNumbers = payStatusPeriods.map { it.prisonerNumber }.toSet()
 
-    val prisoners = async { prisonerSearchClient.searchByPrisonerNumbers(prisonerNumbers) }.await().associateBy { it.prisonerNumber }
+    val prisoners = prisonerSearchClient.searchByPrisonerNumbers(prisonerNumbers).associateBy { it.prisonerNumber }
 
     (prisonerNumbers - prisoners.keys)
       .takeIf { it.isNotEmpty() }
