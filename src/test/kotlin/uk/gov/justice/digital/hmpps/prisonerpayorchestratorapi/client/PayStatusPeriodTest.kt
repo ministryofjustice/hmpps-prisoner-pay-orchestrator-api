@@ -5,10 +5,10 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.mockito.Spy
 import org.springframework.web.reactive.function.client.WebClient
+import uk.gov.justice.digital.hmpps.prisonerpayorchestratorapi.helper.payStatusPeriod
 import uk.gov.justice.digital.hmpps.prisonerpayorchestratorapi.helper.today
 import uk.gov.justice.digital.hmpps.prisonerpayorchestratorapi.integration.wiremock.PrisonerPayAPIMockServer
 import java.time.LocalDateTime
-import java.util.UUID
 
 class PayStatusPeriodTest {
   @Spy
@@ -24,19 +24,15 @@ class PayStatusPeriodTest {
   fun `should retrieve pay status periods`() {
     val latestStartDate = today()
     val payStatusPeriods = listOf(
-      PayStatusPeriod(
-        id = UUID.randomUUID(),
+      payStatusPeriod(
         prisonerNumber = "A1111AA",
-        type = PayStatusType.LONG_TERM_SICK,
         startDate = today().minusDays(12),
         endDate = today().plusDays(1),
         createdBy = "BLOGGSJ",
         createdDateTime = LocalDateTime.now(),
       ),
-      PayStatusPeriod(
-        id = UUID.randomUUID(),
+      payStatusPeriod(
         prisonerNumber = "B2222BB",
-        type = PayStatusType.LONG_TERM_SICK,
         startDate = today().minusDays(6),
         createdBy = "SMITHJ",
         createdDateTime = LocalDateTime.now().minusHours(2),

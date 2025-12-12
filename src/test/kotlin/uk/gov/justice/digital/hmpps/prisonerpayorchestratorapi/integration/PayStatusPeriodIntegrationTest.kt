@@ -4,13 +4,12 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
-import uk.gov.justice.digital.hmpps.prisonerpayorchestratorapi.client.PayStatusPeriod
 import uk.gov.justice.digital.hmpps.prisonerpayorchestratorapi.client.PayStatusType
-import uk.gov.justice.digital.hmpps.prisonerpayorchestratorapi.client.Prisoner
+import uk.gov.justice.digital.hmpps.prisonerpayorchestratorapi.helper.payStatusPeriod
+import uk.gov.justice.digital.hmpps.prisonerpayorchestratorapi.helper.prisoner
 import uk.gov.justice.digital.hmpps.prisonerpayorchestratorapi.helper.today
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.UUID
 import uk.gov.justice.digital.hmpps.prisonerpayorchestratorapi.dto.PayStatusPeriod as PayStatusPeriodDto
 
 class PayStatusPeriodIntegrationTest : IntegrationTestBase() {
@@ -20,27 +19,21 @@ class PayStatusPeriodIntegrationTest : IntegrationTestBase() {
     val latestStartDate = today()
 
     val payStatusPeriods = listOf(
-      PayStatusPeriod(
-        id = UUID.randomUUID(),
+      payStatusPeriod(
         prisonerNumber = "A1111AA",
-        type = PayStatusType.LONG_TERM_SICK,
         startDate = today().minusDays(12),
         endDate = today().plusDays(1),
         createdBy = "BLOGGSJ",
         createdDateTime = LocalDateTime.now(),
       ),
-      PayStatusPeriod(
-        id = UUID.randomUUID(),
+      payStatusPeriod(
         prisonerNumber = "B2222BB",
-        type = PayStatusType.LONG_TERM_SICK,
         startDate = today().minusDays(6),
         createdBy = "SMITHJ",
         createdDateTime = LocalDateTime.now().minusHours(2),
       ),
-      PayStatusPeriod(
-        id = UUID.randomUUID(),
+      payStatusPeriod(
         prisonerNumber = "C3333CC",
-        type = PayStatusType.LONG_TERM_SICK,
         startDate = today().minusDays(44),
         createdBy = "SMITHJ",
         createdDateTime = LocalDateTime.now().minusHours(3),
@@ -48,13 +41,13 @@ class PayStatusPeriodIntegrationTest : IntegrationTestBase() {
     )
 
     val prisoners = listOf(
-      Prisoner(
+      prisoner(
         prisonerNumber = "A1111AA",
         firstName = "JOHN",
         lastName = "SMITH",
         cellLocation = "A-1-001",
       ),
-      Prisoner(
+      prisoner(
         prisonerNumber = "B2222BB",
         firstName = "JONES",
         lastName = "ALAN",
