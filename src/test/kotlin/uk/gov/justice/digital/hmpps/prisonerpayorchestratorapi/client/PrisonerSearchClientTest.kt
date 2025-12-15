@@ -7,6 +7,7 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.mockito.Spy
 import org.springframework.web.reactive.function.client.WebClient
+import uk.gov.justice.digital.hmpps.prisonerpayorchestratorapi.helper.prisoner
 import uk.gov.justice.digital.hmpps.prisonerpayorchestratorapi.integration.wiremock.PrisonerSearchMockServer
 import java.util.*
 
@@ -25,13 +26,13 @@ class PrisonerSearchClientTest {
     val prisonerNumbers = setOf("A1111AA", "B2222BB")
 
     val prisoners = listOf(
-      Prisoner(
+      prisoner(
         prisonerNumber = "A1111AA",
         firstName = "JOHN",
         lastName = "SMITH",
         cellLocation = "A-1-001",
       ),
-      Prisoner(
+      prisoner(
         prisonerNumber = "B2222BB",
         firstName = "JONES",
         lastName = "ALAN",

@@ -12,7 +12,7 @@ import uk.gov.justice.digital.hmpps.prisonerpayorchestratorapi.client.PrisonerNu
 class PrisonerSearchMockServer : MockServer(8092) {
   fun stubSearchByPrisonerNumbers(prisonerNumbers: Set<String>, prisoners: List<Prisoner>) {
     stubFor(
-      WireMock.post(WireMock.urlEqualTo("/prisoner-search/prisoner-numbers"))
+      WireMock.post(WireMock.urlEqualTo("/prisoner-search/prisoner-numbers?responseFields=prisonerNumber,firstName,lastName,cellLocation"))
         .withRequestBody(equalToJson(mapper.writeValueAsString(PrisonerNumbersSearch(prisonerNumbers = prisonerNumbers)), true, true))
         .willReturn(
           WireMock.aResponse()
