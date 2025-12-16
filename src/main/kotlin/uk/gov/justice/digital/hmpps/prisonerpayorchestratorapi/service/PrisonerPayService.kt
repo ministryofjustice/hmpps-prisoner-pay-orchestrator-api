@@ -17,11 +17,16 @@ class PrisonerPayService(
     private val log = LoggerFactory.getLogger(this::class.java)
   }
 
-  fun search(latestStartDate: LocalDate, activeOnly: Boolean) = runBlocking {
-    val payStatusPeriods = prisonerPayApiClient.search(latestStartDate, activeOnly)
+  fun search(prisonCode: String, latestStartDate: LocalDate, activeOnly: Boolean) = runBlocking {
+    val payStatusPeriods = prisonerPayApiClient.search(
+      prisonCode = prisonCode,
+      latestStartDate = latestStartDate,
+      activeOnly = activeOnly,
+    )
 
     val prisonerNumbers = payStatusPeriods.map { it.prisonerNumber }.toSet()
 
+    // TODO: What happens if prisoner is not in the expected prison?
     val prisoners = prisonerSearchClient.searchByPrisonerNumbers(prisonerNumbers).associateBy { it.prisonerNumber }
 
     (prisonerNumbers - prisoners.keys)

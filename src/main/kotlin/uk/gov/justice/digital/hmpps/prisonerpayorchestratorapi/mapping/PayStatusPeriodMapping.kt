@@ -6,6 +6,7 @@ import uk.gov.justice.digital.hmpps.prisonerpayorchestratorapi.client.PayStatusP
 
 internal fun ApiDto.toModel(prisoner: Prisoner) = PayStatusPeriod(
   id = id,
+  prisonCode = prisonCode,
   prisonerNumber = prisonerNumber,
   firstName = prisoner.firstName,
   lastName = prisoner.lastName,
