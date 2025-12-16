@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import uk.gov.justice.digital.hmpps.prisonerpayorchestratorapi.client.PayStatusType
+import uk.gov.justice.digital.hmpps.prisonerpayorchestratorapi.helper.PENTONVILLE
 import uk.gov.justice.digital.hmpps.prisonerpayorchestratorapi.helper.payStatusPeriod
 import uk.gov.justice.digital.hmpps.prisonerpayorchestratorapi.helper.prisoner
 import uk.gov.justice.digital.hmpps.prisonerpayorchestratorapi.helper.today
@@ -57,16 +58,22 @@ class PayStatusPeriodIntegrationTest : IntegrationTestBase() {
 
     val prisonerNumbers = setOf("A1111AA", "B2222BB", "C3333CC")
 
-    prisonPayApi().stubSearch(latestStartDate, false, payStatusPeriods)
+    prisonPayApi().stubSearch(
+      prisonCode = PENTONVILLE,
+      latestStartDate = latestStartDate,
+      activeOnly = false,
+      response = payStatusPeriods,
+    )
 
     prisonSearchApi().stubSearchByPrisonerNumbers(prisonerNumbers, prisoners)
 
-    val result = searchPayStatusPeriods(latestStartDate, false).successList<PayStatusPeriodDto>()
+    val result = searchPayStatusPeriods(latestStartDate, false, PENTONVILLE).successList<PayStatusPeriodDto>()
 
     assertThat(result).isEqualTo(
       listOf(
         PayStatusPeriodDto(
           id = payStatusPeriods[0].id,
+          prisonCode = PENTONVILLE,
           prisonerNumber = "A1111AA",
           firstName = "JOHN",
           lastName = "SMITH",
@@ -79,6 +86,7 @@ class PayStatusPeriodIntegrationTest : IntegrationTestBase() {
         ),
         PayStatusPeriodDto(
           id = payStatusPeriods[1].id,
+          prisonCode = PENTONVILLE,
           prisonerNumber = "B2222BB",
           firstName = "JONES",
           lastName = "ALAN",
@@ -95,12 +103,13 @@ class PayStatusPeriodIntegrationTest : IntegrationTestBase() {
 
   @Test
   fun `search returns forbidden when no bearer token`() {
-    searchPayStatusPeriods(today(), false, includeBearerAuth = false).fail(HttpStatus.UNAUTHORIZED)
+    searchPayStatusPeriods(includeBearerAuth = false).fail(HttpStatus.UNAUTHORIZED)
   }
 
   private fun searchPayStatusPeriods(
     latestStartDate: LocalDate = today(),
     activeOnly: Boolean = true,
+    prisonCode: String = PENTONVILLE,
     username: String = USERNAME,
     roles: List<String> = listOf(),
     includeBearerAuth: Boolean = true,
@@ -109,6 +118,7 @@ class PayStatusPeriodIntegrationTest : IntegrationTestBase() {
     .uri { uriBuilder ->
       uriBuilder
         .path("/pay-status-periods")
+        .queryParam("prisonCode", prisonCode)
         .queryParam("latestStartDate", latestStartDate)
         .queryParam("activeOnly", activeOnly)
         .build()

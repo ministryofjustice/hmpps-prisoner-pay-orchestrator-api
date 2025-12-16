@@ -5,6 +5,7 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.mockito.Spy
 import org.springframework.web.reactive.function.client.WebClient
+import uk.gov.justice.digital.hmpps.prisonerpayorchestratorapi.helper.PENTONVILLE
 import uk.gov.justice.digital.hmpps.prisonerpayorchestratorapi.helper.payStatusPeriod
 import uk.gov.justice.digital.hmpps.prisonerpayorchestratorapi.helper.today
 import uk.gov.justice.digital.hmpps.prisonerpayorchestratorapi.integration.wiremock.PrisonerPayAPIMockServer
@@ -23,6 +24,7 @@ class PayStatusPeriodTest {
   @Test
   fun `should retrieve pay status periods`() {
     val latestStartDate = today()
+
     val payStatusPeriods = listOf(
       payStatusPeriod(
         prisonerNumber = "A1111AA",
@@ -39,9 +41,13 @@ class PayStatusPeriodTest {
       ),
     )
 
-    server.stubSearch(latestStartDate, false, payStatusPeriods)
+    server.stubSearch(
+      latestStartDate = latestStartDate,
+      activeOnly = false,
+      response = payStatusPeriods,
+    )
 
-    val result = client.search(latestStartDate, false)
+    val result = client.search(PENTONVILLE, latestStartDate, false)
 
     assertThat(result).isEqualTo(payStatusPeriods)
   }

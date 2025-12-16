@@ -8,9 +8,16 @@ import java.util.*
 
 @Component
 class PrisonerPayApiClient(private val prisonerPayWebClient: WebClient) {
-  fun search(latestStartDate: LocalDate, activeOnly: Boolean): List<PayStatusPeriod> = prisonerPayWebClient
+  fun search(prisonCode: String, latestStartDate: LocalDate, activeOnly: Boolean): List<PayStatusPeriod> = prisonerPayWebClient
     .get()
-    .uri("/pay-status-periods?latestStartDate=$latestStartDate&activeOnly=$activeOnly")
+    .uri { uriBuilder ->
+      uriBuilder
+        .path("/pay-status-periods")
+        .queryParam("prisonCode", prisonCode)
+        .queryParam("latestStartDate", latestStartDate)
+        .queryParam("activeOnly", activeOnly)
+        .build()
+    }
     .retrieve()
     .bodyToMono(typeReference<List<PayStatusPeriod>>())
     .block()!!
@@ -18,6 +25,7 @@ class PrisonerPayApiClient(private val prisonerPayWebClient: WebClient) {
 
 data class PayStatusPeriod(
   val id: UUID,
+  val prisonCode: String,
   val prisonerNumber: String,
   val type: PayStatusType,
   val startDate: LocalDate,

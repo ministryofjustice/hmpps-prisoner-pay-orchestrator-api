@@ -60,8 +60,13 @@ class PrisonerPayStatusController(private val prisonerPayService: PrisonerPaySer
     @RequestParam(value = "latestStartDate")
     @Parameter(description = "The latest start date the pay status periods started on", example = "2025-07-18")
     latestStartDate: LocalDate,
+
+    @RequestParam("prisonCode", required = true)
+    @Parameter(description = "The prison code", required = true, example = "PVI")
+    prisonCode: String,
+
     @RequestParam(value = "activeOnly", required = false, defaultValue = "true")
     @Parameter(description = "Whether to return results which are currently active, i.e. the end date is null or not before today", example = "true")
     activeOnly: Boolean = true,
-  ) = prisonerPayService.search(latestStartDate, activeOnly)
+  ) = prisonerPayService.search(prisonCode, latestStartDate, activeOnly)
 }
