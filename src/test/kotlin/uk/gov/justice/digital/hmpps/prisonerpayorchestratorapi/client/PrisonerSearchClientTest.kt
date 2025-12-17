@@ -4,9 +4,12 @@ import kotlinx.coroutines.test.runTest
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.DisplayName
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.mockito.Spy
 import org.springframework.web.reactive.function.client.WebClient
+import uk.gov.justice.digital.hmpps.prisonerpayorchestratorapi.helper.PENTONVILLE
 import uk.gov.justice.digital.hmpps.prisonerpayorchestratorapi.helper.prisoner
 import uk.gov.justice.digital.hmpps.prisonerpayorchestratorapi.integration.wiremock.PrisonerSearchMockServer
 import java.util.*
@@ -21,50 +24,82 @@ class PrisonerSearchClientTest {
     server.stop()
   }
 
-  @Test
-  fun `findByPrisonerNumber - returns prisoners`() = runTest {
-    val prisonerNumbers = setOf("A1111AA", "B2222BB")
+  @Nested
+  @DisplayName("Find prisoners by prisoner numbers")
+  inner class FindByPrisonerNumbers {
+    @Test
+    fun `returns prisoners`() = runTest {
+      val prisonerNumbers = setOf("A1111AA", "B2222BB")
 
-    val prisoners = listOf(
-      prisoner(
-        prisonerNumber = "A1111AA",
-        firstName = "JOHN",
-        lastName = "SMITH",
-        cellLocation = "A-1-001",
-      ),
-      prisoner(
-        prisonerNumber = "B2222BB",
-        firstName = "JONES",
-        lastName = "ALAN",
-        cellLocation = "B-2-002",
-      ),
-    )
+      val prisoners = listOf(
+        prisoner(
+          prisonerNumber = "A1111AA",
+          firstName = "JOHN",
+          lastName = "SMITH",
+          cellLocation = "A-1-001",
+        ),
+        prisoner(
+          prisonerNumber = "B2222BB",
+          firstName = "JONES",
+          lastName = "ALAN",
+          cellLocation = "B-2-002",
+        ),
+      )
 
-    server.stubSearchByPrisonerNumbers(prisonerNumbers, prisoners)
+      server.stubSearchByPrisonerNumbers(prisonerNumbers, prisoners)
 
-    val result = client.searchByPrisonerNumbers(prisonerNumbers)
+      val result = client.findByPrisonerNumbers(prisonerNumbers)
 
-    assertThat(result).isEqualTo(prisoners)
-  }
-
-  @Test
-  fun `findByPrisonerNumber - throws and exception if more than 1000 prisoners`() {
-    val prisonerNumbers = generateSequence { UUID.randomUUID().toString() }
-      .distinct()
-      .take(1001)
-      .toSet()
-
-    assertThatThrownBy {
-      runTest {
-        client.searchByPrisonerNumbers(prisonerNumbers)
-      }
+      assertThat(result).isEqualTo(prisoners)
     }
-      .isInstanceOf(IllegalArgumentException::class.java)
-      .hasMessage("Cannot handle more than 1000 prisoner numbers")
+
+    @Test
+    fun `throws and exception if more than 1000 prisoners`() {
+      val prisonerNumbers = generateSequence { UUID.randomUUID().toString() }
+        .distinct()
+        .take(1001)
+        .toSet()
+
+      assertThatThrownBy {
+        runTest {
+          client.findByPrisonerNumbers(prisonerNumbers)
+        }
+      }
+        .isInstanceOf(IllegalArgumentException::class.java)
+        .hasMessage("Cannot handle more than 1000 prisoner numbers")
+    }
+
+    @Test
+    fun `returns an empty list if supplied prisoner numbers is empty`() = runTest {
+      assertThat(client.findByPrisonerNumbers(emptySet())).isEmpty()
+    }
   }
 
-  @Test
-  fun `findByPrisonerNumber - returns an empty list if supplied prisoner numbers is empty`() = runTest {
-    assertThat(client.searchByPrisonerNumbers(emptySet())).isEmpty()
+  @Nested
+  @DisplayName("Find prisoners by search term")
+  inner class FindPrisonersBySearchTerm {
+    @Test
+    fun `returns prisoners`() = runTest {
+      val prisoners = listOf(
+        prisoner(
+          prisonerNumber = "A1111AA",
+          firstName = "JOHN",
+          lastName = "SMITH",
+          cellLocation = "A-1-001",
+        ),
+        prisoner(
+          prisonerNumber = "B2222BB",
+          firstName = "ALAN",
+          lastName = "JOSEPH",
+          cellLocation = "B-2-002",
+        ),
+      )
+
+      server.stubSearchBySearchTerm(searchTerm = "Jo", prisoners = prisoners)
+
+      val result = client.search(PENTONVILLE, "Jo")
+
+      assertThat(result).isEqualTo(PagedPrisoner(prisoners))
+    }
   }
 }

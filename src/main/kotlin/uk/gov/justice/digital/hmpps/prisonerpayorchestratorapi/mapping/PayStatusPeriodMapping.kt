@@ -2,9 +2,9 @@ package uk.gov.justice.digital.hmpps.prisonerpayorchestratorapi.mapping
 
 import uk.gov.justice.digital.hmpps.prisonerpayorchestratorapi.client.Prisoner
 import uk.gov.justice.digital.hmpps.prisonerpayorchestratorapi.dto.PayStatusPeriod
-import uk.gov.justice.digital.hmpps.prisonerpayorchestratorapi.client.PayStatusPeriod as ApiDto
+import uk.gov.justice.digital.hmpps.prisonerpayorchestratorapi.client.PayStatusPeriod as PrisonerPayPayStatusPeriod
 
-internal fun ApiDto.toModel(prisoner: Prisoner) = PayStatusPeriod(
+internal fun PrisonerPayPayStatusPeriod.toModel(prisoner: Prisoner) = PayStatusPeriod(
   id = id,
   prisonCode = prisonCode,
   prisonerNumber = prisonerNumber,

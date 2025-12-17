@@ -1,23 +1,23 @@
 package uk.gov.justice.digital.hmpps.prisonerpayorchestratorapi.client
 
+import kotlinx.coroutines.reactor.awaitSingle
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.awaitBody
 
 @Component
 class PrisonerSearchClient(private val prisonerSearchWebClient: WebClient) {
+  private val responseFields = listOf(
+    "prisonerNumber",
+    "firstName",
+    "lastName",
+    "cellLocation",
+  ).joinToString(",")
 
-  suspend fun searchByPrisonerNumbers(prisonerNumbers: Set<String>): List<Prisoner> {
+  suspend fun findByPrisonerNumbers(prisonerNumbers: Set<String>): List<Prisoner> {
     if (prisonerNumbers.isEmpty()) return emptyList()
 
     require(prisonerNumbers.size <= 1000) { "Cannot handle more than 1000 prisoner numbers" }
-
-    val responseFields = listOf(
-      "prisonerNumber",
-      "firstName",
-      "lastName",
-      "cellLocation",
-    ).joinToString(",")
 
     return prisonerSearchWebClient
       .post()
@@ -31,6 +31,20 @@ class PrisonerSearchClient(private val prisonerSearchWebClient: WebClient) {
       .retrieve()
       .awaitBody()
   }
+
+  suspend fun search(prisonCode: String, searchTerm: String): PagedPrisoner = prisonerSearchWebClient
+    .get()
+    .uri { uriBuilder ->
+      uriBuilder
+        .path("/prison/$prisonCode/prisoners")
+        .queryParam("term", searchTerm)
+        .queryParam("size", 50)
+        .queryParam("responseFields", responseFields)
+        .build()
+    }
+    .retrieve()
+    .bodyToMono(typeReference<PagedPrisoner>())
+    .awaitSingle()
 }
 
 data class Prisoner(
@@ -41,3 +55,7 @@ data class Prisoner(
 )
 
 data class PrisonerNumbersSearch(val prisonerNumbers: Set<String>)
+
+data class PagedPrisoner(
+  val content: List<Prisoner>,
+)
