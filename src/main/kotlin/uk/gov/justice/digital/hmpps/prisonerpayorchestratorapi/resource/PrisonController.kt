@@ -23,8 +23,9 @@ import uk.gov.justice.hmpps.kotlin.common.ErrorResponse
 @RestController
 @RequestMapping(value = ["prison"], produces = [MediaType.APPLICATION_JSON_VALUE])
 @Tag(
-  name = "prison",
+  name = "Prison",
 )
+@AuthApiResponses
 class PrisonController(
   private val candidateService: CandidateService,
 ) {
@@ -41,22 +42,12 @@ class PrisonController(
     responses = [
       ApiResponse(
         responseCode = "200",
-        description = "Returns th list of matched prisoners",
+        description = "Returns the list of matched prisoners",
         content = [Content(mediaType = "application/json", array = ArraySchema(schema = Schema(implementation = Prisoner::class)))],
       ),
       ApiResponse(
         responseCode = "400",
         description = "Invalid Request",
-        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
-      ),
-      ApiResponse(
-        responseCode = "401",
-        description = "Unauthorized to access this endpoint",
-        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
-      ),
-      ApiResponse(
-        responseCode = "403",
-        description = "Missing required role. Requires the <TODO> role with write scope.",
         content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
       ),
     ],

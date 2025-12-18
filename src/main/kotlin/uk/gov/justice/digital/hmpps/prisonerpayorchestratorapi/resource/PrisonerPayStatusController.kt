@@ -25,6 +25,7 @@ import java.time.LocalDate
 @Tag(
   name = "Pay Status Periods",
 )
+@AuthApiResponses
 class PrisonerPayStatusController(private val prisonerPayService: PrisonerPayService) {
 
   @GetMapping
@@ -42,16 +43,6 @@ class PrisonerPayStatusController(private val prisonerPayService: PrisonerPaySer
       ApiResponse(
         responseCode = "400",
         description = "Invalid Request",
-        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
-      ),
-      ApiResponse(
-        responseCode = "401",
-        description = "Unauthorized to access this endpoint",
-        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
-      ),
-      ApiResponse(
-        responseCode = "403",
-        description = "Missing required role. Requires the <TODO> role with write scope.",
         content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
       ),
     ],
