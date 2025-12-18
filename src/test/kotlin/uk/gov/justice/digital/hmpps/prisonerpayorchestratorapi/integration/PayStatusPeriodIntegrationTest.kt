@@ -102,8 +102,13 @@ class PayStatusPeriodIntegrationTest : IntegrationTestBase() {
   }
 
   @Test
-  fun `search returns forbidden when no bearer token`() {
+  fun `search returns unauthorized when no bearer token`() {
     searchPayStatusPeriods(includeBearerAuth = false).fail(HttpStatus.UNAUTHORIZED)
+  }
+
+  @Test
+  fun `search returns forbidden when role is incorrect`() {
+    searchPayStatusPeriods(roles = listOf("ROLE_BLAH")).fail(HttpStatus.FORBIDDEN)
   }
 
   private fun searchPayStatusPeriods(
@@ -111,7 +116,7 @@ class PayStatusPeriodIntegrationTest : IntegrationTestBase() {
     activeOnly: Boolean = true,
     prisonCode: String = PENTONVILLE,
     username: String = USERNAME,
-    roles: List<String> = listOf(),
+    roles: List<String> = listOf("ROLE_PRISONER_PAY__PRISONER_PAY_UI"),
     includeBearerAuth: Boolean = true,
   ) = webTestClient
     .get()
@@ -124,6 +129,6 @@ class PayStatusPeriodIntegrationTest : IntegrationTestBase() {
         .build()
     }
     .accept(MediaType.APPLICATION_JSON)
-    .headers(if (includeBearerAuth) setAuthorisation() else noAuthorisation())
+    .headers(if (includeBearerAuth) setAuthorisation(roles = roles) else noAuthorisation())
     .exchange()
 }
