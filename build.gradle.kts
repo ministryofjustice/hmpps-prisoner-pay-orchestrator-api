@@ -17,7 +17,7 @@ dependencies {
   implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:1.10.2")
   implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor:1.10.2")
 
-  testImplementation("uk.gov.justice.service.hmpps:hmpps-kotlin-spring-boot-starter-test:1.8.2")
+  testImplementation("uk.gov.justice.service.hmpps:hmpps-kotlin-spring-boot-starter-test:2.0.0")
   testImplementation("org.wiremock:wiremock-standalone:3.13.2")
   testImplementation("io.mockk:mockk:1.14.7")
   testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2")
