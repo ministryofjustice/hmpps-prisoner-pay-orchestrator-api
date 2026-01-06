@@ -25,10 +25,11 @@ import java.time.LocalDate
 @Tag(
   name = "Pay Status Periods",
 )
+@AuthApiResponses
 class PrisonerPayStatusController(private val prisonerPayService: PrisonerPayService) {
 
   @GetMapping
-  @PreAuthorize("permitAll()") // TODO: Add roles
+  @PreAuthorize("hasRole('ROLE_PRISONER_PAY__PRISONER_PAY_UI')")
   @ResponseStatus(HttpStatus.OK)
   @Operation(
     summary = "Retrieve a list of pay status periods ordered by start date",
@@ -44,27 +45,15 @@ class PrisonerPayStatusController(private val prisonerPayService: PrisonerPaySer
         description = "Invalid Request",
         content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
       ),
-      ApiResponse(
-        responseCode = "401",
-        description = "Unauthorized to access this endpoint",
-        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
-      ),
-      ApiResponse(
-        responseCode = "403",
-        description = "Missing required role. Requires the <TODO> role with write scope.",
-        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
-      ),
     ],
   )
   fun search(
     @RequestParam(value = "latestStartDate")
     @Parameter(description = "The latest start date the pay status periods started on", example = "2025-07-18")
     latestStartDate: LocalDate,
-
     @RequestParam("prisonCode", required = true)
     @Parameter(description = "The prison code", required = true, example = "PVI")
     prisonCode: String,
-
     @RequestParam(value = "activeOnly", required = false, defaultValue = "true")
     @Parameter(description = "Whether to return results which are currently active, i.e. the end date is null or not before today", example = "true")
     activeOnly: Boolean = true,

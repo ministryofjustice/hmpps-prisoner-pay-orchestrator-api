@@ -27,7 +27,7 @@ class PrisonerPayService(
     val prisonerNumbers = payStatusPeriods.map { it.prisonerNumber }.toSet()
 
     // TODO: What happens if prisoner is not in the expected prison?
-    val prisoners = prisonerSearchClient.searchByPrisonerNumbers(prisonerNumbers).associateBy { it.prisonerNumber }
+    val prisoners = prisonerSearchClient.findByPrisonerNumbers(prisonerNumbers).associateBy { it.prisonerNumber }
 
     (prisonerNumbers - prisoners.keys)
       .takeIf { it.isNotEmpty() }
