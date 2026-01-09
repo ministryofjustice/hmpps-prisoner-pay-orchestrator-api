@@ -4,6 +4,7 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT
+import org.springframework.boot.webtestclient.autoconfigure.AutoConfigureWebTestClient
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.test.context.ActiveProfiles
@@ -24,6 +25,7 @@ internal const val USERNAME = "TestUser"
   PrisonerPayApiExtension::class,
   PrisonerSearchExtension::class,
 )
+@AutoConfigureWebTestClient
 abstract class IntegrationTestBase {
 
   @Autowired
@@ -53,11 +55,11 @@ abstract class IntegrationTestBase {
     hmppsAuth.stubHealthPing(status)
   }
 
-  internal final inline fun <reified T> WebTestClient.ResponseSpec.success(status: HttpStatus = HttpStatus.OK): T = expectStatus().isEqualTo(status)
+  internal final inline fun <reified T : Any> WebTestClient.ResponseSpec.success(status: HttpStatus = HttpStatus.OK): T = expectStatus().isEqualTo(status)
     .expectBody(T::class.java)
     .returnResult().responseBody!!
 
-  internal final inline fun <reified T> WebTestClient.ResponseSpec.successList(status: HttpStatus = HttpStatus.OK): List<T> = expectStatus().isEqualTo(status)
+  internal final inline fun <reified T : Any> WebTestClient.ResponseSpec.successList(status: HttpStatus = HttpStatus.OK): List<T> = expectStatus().isEqualTo(status)
     .expectBodyList(T::class.java)
     .returnResult().responseBody!!
 

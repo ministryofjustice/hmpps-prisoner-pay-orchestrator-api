@@ -9,6 +9,10 @@ Create a file called `http-client.private.env.json` like this:
   "local": {
     "client-id": "<<ui-client-id>>",
     "client-secret": "<<ui-client-secret>>"
+  },
+  "dev": {
+    "client-id": "<<ui-client-id>>",
+    "client-secret": "<<ui-client-secret>>"
   }
 }
 ```
