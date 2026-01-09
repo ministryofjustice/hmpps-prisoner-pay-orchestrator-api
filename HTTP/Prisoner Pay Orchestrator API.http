@@ -1,0 +1,28 @@
+Prisoner Pay Orchestrator API.http:
+
+### Get info
+
+GET {{baseUrl}}/info
+
+### Get pay status period by id
+
+// @no-log
+GET {{ baseUrl }}/pay-status-periods/019b9e84-de01-7939-859e-e72af57bd7f1
+Authorization: Bearer {{$auth.token("auth-token")}}
+
+### Get list of pay status periods
+
+// @no-log
+GET {{ baseUrl }}/pay-status-periods?
+    latestStartDate=2025-12-02&
+    activeOnly=false&
+    prisonCode=RSI
+Authorization: Bearer {{$auth.token("auth-token")}}
+
+
+### Search for candidates
+
+// @no-log
+GET {{ baseUrl }}/prison/RSI/candidate-search?searchTerm=jo
+Authorization: Bearer {{$auth.token("auth-token")}}
+

@@ -4,6 +4,7 @@ import kotlinx.coroutines.reactor.awaitSingle
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.awaitBody
+import org.springframework.web.util.UriBuilder
 
 @Component
 class PrisonerSearchClient(private val prisonerSearchWebClient: WebClient) {
@@ -13,6 +14,16 @@ class PrisonerSearchClient(private val prisonerSearchWebClient: WebClient) {
     "lastName",
     "cellLocation",
   ).joinToString(",")
+
+  suspend fun findByPrisonerNumber(prisonerNumber: String): Prisoner = prisonerSearchWebClient
+    .get()
+    .uri { uriBuilder: UriBuilder ->
+      uriBuilder
+        .path("/prisoner/{prisonerNumber}")
+        .build(prisonerNumber)
+    }
+    .retrieve()
+    .awaitBody()
 
   suspend fun findByPrisonerNumbers(prisonerNumbers: Set<String>): List<Prisoner> {
     if (prisonerNumbers.isEmpty()) return emptyList()

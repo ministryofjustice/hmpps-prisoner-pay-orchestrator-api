@@ -15,6 +15,18 @@ import uk.gov.justice.digital.hmpps.prisonerpayorchestratorapi.client.PrisonerNu
 import uk.gov.justice.digital.hmpps.prisonerpayorchestratorapi.helper.PENTONVILLE
 
 class PrisonerSearchMockServer : MockServer(8092) {
+  fun stubGetPrisonerById(prisonerNumber: String, prisoner: Prisoner) {
+    stubFor(
+      get(urlPathEqualTo("/prisoner/$prisonerNumber"))
+        .willReturn(
+          WireMock.aResponse()
+            .withHeader("Content-Type", "application/json")
+            .withBody(mapper.writeValueAsString(prisoner))
+            .withStatus(200),
+        ),
+    )
+  }
+
   fun stubSearchByPrisonerNumbers(prisonerNumbers: Set<String>, prisoners: List<Prisoner>) {
     stubFor(
       post(urlPathEqualTo("/prisoner-search/prisoner-numbers"))

@@ -11,8 +11,21 @@ import uk.gov.justice.digital.hmpps.prisonerpayorchestratorapi.client.PayStatusP
 import uk.gov.justice.digital.hmpps.prisonerpayorchestratorapi.helper.PENTONVILLE
 import uk.gov.justice.digital.hmpps.prisonerpayorchestratorapi.helper.today
 import java.time.LocalDate
+import java.util.*
 
 class PrisonerPayAPIMockServer : MockServer(8762) {
+  fun stubGetById(id: UUID, response: PayStatusPeriod) {
+    stubFor(
+      WireMock.get(urlPathEqualTo("/pay-status-periods/$id"))
+        .willReturn(
+          WireMock.aResponse()
+            .withHeader("Content-Type", "application/json")
+            .withBody(mapper.writeValueAsString(response))
+            .withStatus(200),
+        ),
+    )
+  }
+
   fun stubSearch(
     prisonCode: String = PENTONVILLE,
     latestStartDate: LocalDate = today(),

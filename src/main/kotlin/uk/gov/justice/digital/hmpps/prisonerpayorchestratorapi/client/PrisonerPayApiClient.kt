@@ -2,13 +2,16 @@ package uk.gov.justice.digital.hmpps.prisonerpayorchestratorapi.client
 
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.client.WebClient
+import org.springframework.web.reactive.function.client.awaitBody
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
 @Component
 class PrisonerPayApiClient(private val prisonerPayWebClient: WebClient) {
-  fun search(prisonCode: String, latestStartDate: LocalDate, activeOnly: Boolean): List<PayStatusPeriod> = prisonerPayWebClient
+  suspend fun getById(id: UUID): PayStatusPeriod = prisonerPayWebClient.get().uri("/pay-status-periods/$id").retrieve().awaitBody()
+
+  suspend fun search(prisonCode: String, latestStartDate: LocalDate, activeOnly: Boolean): List<PayStatusPeriod> = prisonerPayWebClient
     .get()
     .uri { uriBuilder ->
       uriBuilder
@@ -19,8 +22,7 @@ class PrisonerPayApiClient(private val prisonerPayWebClient: WebClient) {
         .build()
     }
     .retrieve()
-    .bodyToMono(typeReference<List<PayStatusPeriod>>())
-    .block()!!
+    .awaitBody()
 }
 
 data class PayStatusPeriod(
