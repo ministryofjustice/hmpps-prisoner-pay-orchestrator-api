@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseStatus
@@ -19,6 +20,7 @@ import uk.gov.justice.digital.hmpps.prisonerpayorchestratorapi.dto.PayStatusPeri
 import uk.gov.justice.digital.hmpps.prisonerpayorchestratorapi.service.PrisonerPayService
 import uk.gov.justice.hmpps.kotlin.common.ErrorResponse
 import java.time.LocalDate
+import java.util.UUID
 
 @RestController
 @RequestMapping(value = ["pay-status-periods"], produces = [MediaType.APPLICATION_JSON_VALUE])
@@ -26,14 +28,41 @@ import java.time.LocalDate
   name = "Pay Status Periods",
 )
 @AuthApiResponses
-class PrisonerPayStatusController(private val prisonerPayService: PrisonerPayService) {
+class PayStatusPeriodController(private val prisonerPayService: PrisonerPayService) {
+  @GetMapping("/{id}")
+  @PreAuthorize("hasRole('ROLE_PRISONER_PAY__PRISONER_PAY_UI')")
+  @ResponseStatus(HttpStatus.OK)
+  @Operation(
+    summary = "Retrieve a pay status periods by its id",
+    responses = [
+      ApiResponse(
+        responseCode = "200",
+        description = "Returns the prisoner status period",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = PayStatusPeriod::class))],
+      ),
+      ApiResponse(
+        responseCode = "400",
+        description = "Invalid Request",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
+      ),
+      ApiResponse(
+        responseCode = "404",
+        description = "Data not found",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
+      ),
+    ],
+  )
+  suspend fun getById(
+    @PathVariable
+    @Parameter(description = "The id of the pay status period")
+    id: UUID,
+  ) = prisonerPayService.getById(id)
 
   @GetMapping
   @PreAuthorize("hasRole('ROLE_PRISONER_PAY__PRISONER_PAY_UI')")
   @ResponseStatus(HttpStatus.OK)
   @Operation(
     summary = "Retrieve a list of pay status periods ordered by start date",
-    // description = "Requires role <TODO>",
     responses = [
       ApiResponse(
         responseCode = "200",
@@ -47,7 +76,7 @@ class PrisonerPayStatusController(private val prisonerPayService: PrisonerPaySer
       ),
     ],
   )
-  fun search(
+  suspend fun search(
     @RequestParam(value = "latestStartDate")
     @Parameter(description = "The latest start date the pay status periods started on", example = "2025-07-18")
     latestStartDate: LocalDate,

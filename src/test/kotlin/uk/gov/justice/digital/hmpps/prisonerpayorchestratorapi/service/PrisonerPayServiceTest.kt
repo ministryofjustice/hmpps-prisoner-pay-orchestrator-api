@@ -1,33 +1,40 @@
-package uk.gov.justice.digital.hmpps.prisonerpayorchestratorapi.integration
+package uk.gov.justice.digital.hmpps.prisonerpayorchestratorapi.service
 
+import kotlinx.coroutines.test.runTest
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import org.springframework.http.HttpStatus
-import org.springframework.http.MediaType
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.whenever
 import uk.gov.justice.digital.hmpps.prisonerpayorchestratorapi.client.PayStatusType
+import uk.gov.justice.digital.hmpps.prisonerpayorchestratorapi.client.PrisonerPayApiClient
+import uk.gov.justice.digital.hmpps.prisonerpayorchestratorapi.client.PrisonerSearchClient
+import uk.gov.justice.digital.hmpps.prisonerpayorchestratorapi.dto.PayStatusPeriod
 import uk.gov.justice.digital.hmpps.prisonerpayorchestratorapi.helper.PENTONVILLE
 import uk.gov.justice.digital.hmpps.prisonerpayorchestratorapi.helper.UUID1
 import uk.gov.justice.digital.hmpps.prisonerpayorchestratorapi.helper.payStatusPeriod
 import uk.gov.justice.digital.hmpps.prisonerpayorchestratorapi.helper.prisoner
 import uk.gov.justice.digital.hmpps.prisonerpayorchestratorapi.helper.today
-import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.UUID
-import uk.gov.justice.digital.hmpps.prisonerpayorchestratorapi.dto.PayStatusPeriod as PayStatusPeriodDto
 
-class PayStatusPeriodIntegrationTest : IntegrationTestBase() {
+class PrisonerPayServiceTest {
+  val prisonerPayApiClient: PrisonerPayApiClient = mock()
+  val prisonerSearchClient: PrisonerSearchClient = mock()
+
+  val prisonerPayService = PrisonerPayService(prisonerPayApiClient, prisonerSearchClient)
+
   @Test
-  fun `get by id returns the pay status period`() {
+  fun `should return pay the status period by id`() = runTest {
     val payStatusPeriod = payStatusPeriod()
     val prisoner = prisoner()
 
-    prisonPayApi().stubGetById(UUID1, payStatusPeriod)
-    prisonSearchApi().stubGetPrisonerById(payStatusPeriod.prisonerNumber, prisoner)
+    whenever(prisonerPayApiClient.getById(UUID1)).thenReturn(payStatusPeriod)
 
-    val result = getById(UUID1).success<PayStatusPeriodDto>()
+    whenever(prisonerSearchClient.findByPrisonerNumber(payStatusPeriod().prisonerNumber)).thenReturn(prisoner)
+
+    val result = prisonerPayService.getById(UUID1)
 
     assertThat(result).isEqualTo(
-      PayStatusPeriodDto(
+      PayStatusPeriod(
         id = payStatusPeriod.id,
         prisonCode = payStatusPeriod.prisonCode,
         prisonerNumber = payStatusPeriod.prisonerNumber,
@@ -44,17 +51,7 @@ class PayStatusPeriodIntegrationTest : IntegrationTestBase() {
   }
 
   @Test
-  fun `get by id returns unauthorized when no bearer token`() {
-    getById(UUID1, includeBearerAuth = false).fail(HttpStatus.UNAUTHORIZED)
-  }
-
-  @Test
-  fun `get by id returns forbidden when role is incorrect`() {
-    getById(UUID1, roles = listOf("ROLE_BLAH")).fail(HttpStatus.FORBIDDEN)
-  }
-
-  @Test
-  fun `search for pay status periods`() {
+  fun `should return search results`() = runTest {
     val latestStartDate = today()
 
     val payStatusPeriods = listOf(
@@ -94,22 +91,15 @@ class PayStatusPeriodIntegrationTest : IntegrationTestBase() {
       ),
     )
 
-    val prisonerNumbers = setOf("A1111AA", "B2222BB", "C3333CC")
+    whenever(prisonerPayApiClient.search(PENTONVILLE, latestStartDate, true)).thenReturn(payStatusPeriods)
 
-    prisonPayApi().stubSearch(
-      prisonCode = PENTONVILLE,
-      latestStartDate = latestStartDate,
-      activeOnly = false,
-      response = payStatusPeriods,
-    )
+    whenever(prisonerSearchClient.findByPrisonerNumbers(payStatusPeriods.map { it.prisonerNumber }.toSet())).thenReturn(prisoners)
 
-    prisonSearchApi().stubSearchByPrisonerNumbers(prisonerNumbers, prisoners)
-
-    val result = searchPayStatusPeriods(latestStartDate, false, PENTONVILLE).successList<PayStatusPeriodDto>()
+    val result = prisonerPayService.search(PENTONVILLE, latestStartDate, true)
 
     assertThat(result).isEqualTo(
       listOf(
-        PayStatusPeriodDto(
+        PayStatusPeriod(
           id = payStatusPeriods[0].id,
           prisonCode = PENTONVILLE,
           prisonerNumber = "A1111AA",
@@ -122,7 +112,7 @@ class PayStatusPeriodIntegrationTest : IntegrationTestBase() {
           createdBy = payStatusPeriods[0].createdBy,
           createdDateTime = payStatusPeriods[0].createdDateTime,
         ),
-        PayStatusPeriodDto(
+        PayStatusPeriod(
           id = payStatusPeriods[1].id,
           prisonCode = PENTONVILLE,
           prisonerNumber = "B2222BB",
@@ -138,51 +128,4 @@ class PayStatusPeriodIntegrationTest : IntegrationTestBase() {
       ),
     )
   }
-
-  @Test
-  fun `search returns unauthorized when no bearer token`() {
-    searchPayStatusPeriods(includeBearerAuth = false).fail(HttpStatus.UNAUTHORIZED)
-  }
-
-  @Test
-  fun `search returns forbidden when role is incorrect`() {
-    searchPayStatusPeriods(roles = listOf("ROLE_BLAH")).fail(HttpStatus.FORBIDDEN)
-  }
-
-  private fun getById(
-    id: UUID,
-    username: String = USERNAME,
-    roles: List<String> = listOf("ROLE_PRISONER_PAY__PRISONER_PAY_UI"),
-    includeBearerAuth: Boolean = true,
-  ) = webTestClient
-    .get()
-    .uri { uriBuilder ->
-      uriBuilder
-        .path("/pay-status-periods/$id")
-        .build()
-    }
-    .accept(MediaType.APPLICATION_JSON)
-    .headers(if (includeBearerAuth) setAuthorisation(roles = roles) else noAuthorisation())
-    .exchange()
-
-  private fun searchPayStatusPeriods(
-    latestStartDate: LocalDate = today(),
-    activeOnly: Boolean = true,
-    prisonCode: String = PENTONVILLE,
-    username: String = USERNAME,
-    roles: List<String> = listOf("ROLE_PRISONER_PAY__PRISONER_PAY_UI"),
-    includeBearerAuth: Boolean = true,
-  ) = webTestClient
-    .get()
-    .uri { uriBuilder ->
-      uriBuilder
-        .path("/pay-status-periods")
-        .queryParam("prisonCode", prisonCode)
-        .queryParam("latestStartDate", latestStartDate)
-        .queryParam("activeOnly", activeOnly)
-        .build()
-    }
-    .accept(MediaType.APPLICATION_JSON)
-    .headers(if (includeBearerAuth) setAuthorisation(roles = roles) else noAuthorisation())
-    .exchange()
 }

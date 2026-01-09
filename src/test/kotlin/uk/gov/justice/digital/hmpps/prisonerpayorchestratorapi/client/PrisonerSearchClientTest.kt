@@ -25,6 +25,26 @@ class PrisonerSearchClientTest {
   }
 
   @Nested
+  @DisplayName("Find prisoner by prisoner number")
+  inner class FindByPrisonerNumber {
+    @Test
+    fun `returns the prisoner`() = runTest {
+      val prisoner = prisoner(
+        prisonerNumber = "A1111AA",
+        firstName = "JOHN",
+        lastName = "SMITH",
+        cellLocation = "A-1-001",
+      )
+
+      server.stubGetPrisonerById("A1111AA", prisoner)
+
+      val result = client.findByPrisonerNumber("A1111AA")
+
+      assertThat(result).isEqualTo(prisoner)
+    }
+  }
+
+  @Nested
   @DisplayName("Find prisoners by prisoner numbers")
   inner class FindByPrisonerNumbers {
     @Test
