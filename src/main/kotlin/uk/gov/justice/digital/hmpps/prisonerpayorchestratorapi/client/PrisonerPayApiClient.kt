@@ -23,6 +23,11 @@ class PrisonerPayApiClient(private val prisonerPayWebClient: WebClient) {
     }
     .retrieve()
     .awaitBody()
+
+  suspend fun getCurrentAndFuturePayRates(prisonCode: String): List<PayRate> = prisonerPayWebClient.get()
+    .uri("/pay-rates/prison/$prisonCode", prisonCode)
+    .retrieve()
+    .awaitBody()
 }
 
 data class PayStatusPeriod(
@@ -34,6 +39,16 @@ data class PayStatusPeriod(
   val endDate: LocalDate? = null,
   val createdBy: String,
   val createdDateTime: LocalDateTime,
+)
+
+data class PayRate(
+  val id: UUID,
+  val prisonCode: String,
+  val type: PayStatusType,
+  val startDate: LocalDate,
+  val rate: Int,
+  val createdDateTime: LocalDateTime,
+  val createdBy: String,
 )
 
 enum class PayStatusType {

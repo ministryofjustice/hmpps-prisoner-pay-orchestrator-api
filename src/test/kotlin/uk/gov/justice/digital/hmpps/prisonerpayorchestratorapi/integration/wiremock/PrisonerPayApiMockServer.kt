@@ -7,6 +7,7 @@ import org.junit.jupiter.api.extension.AfterAllCallback
 import org.junit.jupiter.api.extension.BeforeAllCallback
 import org.junit.jupiter.api.extension.BeforeEachCallback
 import org.junit.jupiter.api.extension.ExtensionContext
+import uk.gov.justice.digital.hmpps.prisonerpayorchestratorapi.client.PayRate
 import uk.gov.justice.digital.hmpps.prisonerpayorchestratorapi.client.PayStatusPeriod
 import uk.gov.justice.digital.hmpps.prisonerpayorchestratorapi.helper.PENTONVILLE
 import uk.gov.justice.digital.hmpps.prisonerpayorchestratorapi.helper.today
@@ -37,6 +38,18 @@ class PrisonerPayAPIMockServer : MockServer(8762) {
         .withQueryParam("prisonCode", equalTo(prisonCode))
         .withQueryParam("latestStartDate", equalTo(latestStartDate.toString()))
         .withQueryParam("activeOnly", equalTo(activeOnly.toString()))
+        .willReturn(
+          WireMock.aResponse()
+            .withHeader("Content-Type", "application/json")
+            .withBody(mapper.writeValueAsString(response))
+            .withStatus(200),
+        ),
+    )
+  }
+
+  fun stubGetCurrentAndFuturePayRate(prisonCode: String, response: List<PayRate>) {
+    stubFor(
+      WireMock.get(urlPathEqualTo("/pay-rates/prison/$prisonCode"))
         .willReturn(
           WireMock.aResponse()
             .withHeader("Content-Type", "application/json")

@@ -7,10 +7,14 @@ import org.junit.jupiter.api.Test
 import org.mockito.Spy
 import org.springframework.web.reactive.function.client.WebClient
 import uk.gov.justice.digital.hmpps.prisonerpayorchestratorapi.helper.PENTONVILLE
+import uk.gov.justice.digital.hmpps.prisonerpayorchestratorapi.helper.RISLEY_PRISON_CODE
 import uk.gov.justice.digital.hmpps.prisonerpayorchestratorapi.helper.UUID1
+import uk.gov.justice.digital.hmpps.prisonerpayorchestratorapi.helper.UUID2
+import uk.gov.justice.digital.hmpps.prisonerpayorchestratorapi.helper.payRate
 import uk.gov.justice.digital.hmpps.prisonerpayorchestratorapi.helper.payStatusPeriod
 import uk.gov.justice.digital.hmpps.prisonerpayorchestratorapi.helper.today
 import uk.gov.justice.digital.hmpps.prisonerpayorchestratorapi.integration.wiremock.PrisonerPayAPIMockServer
+import java.time.LocalDate
 import java.time.LocalDateTime
 
 class PrisonerPayApiClientTest {
@@ -71,5 +75,31 @@ class PrisonerPayApiClientTest {
     val result = client.search(PENTONVILLE, latestStartDate, false)
 
     assertThat(result).isEqualTo(payStatusPeriods)
+  }
+
+  @Test
+  fun `should retrieve current and future pay rates`() = runTest {
+    val payRates = listOf(
+      payRate(
+        id = UUID1,
+        prisonCode = "RSI",
+        startDate = LocalDate.of(2026, 2, 2),
+        rate = 100,
+        createdDateTime = LocalDateTime.of(2026, 2, 1, 10, 0),
+      ),
+      payRate(
+        id = UUID2,
+        prisonCode = "RSI",
+        startDate = LocalDate.of(2026, 1, 27),
+        rate = 80,
+        createdDateTime = LocalDateTime.of(2026, 1, 20, 10, 0),
+      ),
+    )
+
+    server.stubGetCurrentAndFuturePayRate(RISLEY_PRISON_CODE, payRates)
+
+    val result = client.getCurrentAndFuturePayRates(RISLEY_PRISON_CODE)
+
+    assertThat(result).isEqualTo(payRates)
   }
 }
