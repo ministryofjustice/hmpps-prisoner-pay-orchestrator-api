@@ -8,7 +8,7 @@ import java.util.UUID
 
 internal fun payRate(
   id: UUID = UUID1,
-  prisonCode: String = "RSI",
+  prisonCode: String = RISLEY_PRISON_CODE,
   type: PayStatusType = PayStatusType.LONG_TERM_SICK,
   startDate: LocalDate = LocalDate.of(2026, 1, 1),
   rate: Int = 99,
