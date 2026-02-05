@@ -2,6 +2,7 @@ package uk.gov.justice.digital.hmpps.prisonerpayorchestratorapi.resource
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
+import io.swagger.v3.oas.annotations.media.ArraySchema
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
@@ -29,12 +30,12 @@ class PayRateController(private val payRateService: PayRateService) {
   @PreAuthorize("hasRole('ROLE_PRISONER_PAY__PRISONER_PAY_UI')")
   @ResponseStatus(HttpStatus.OK)
   @Operation(
-    summary = "Retrieve all current and future long term sick pay rates",
+    summary = "Retrieve all current and future pay rates",
     responses = [
       ApiResponse(
         responseCode = "200",
-        description = "Returns the list of current and future long term sick pay rates",
-        content = [Content(mediaType = "application/json", schema = Schema(implementation = PayRateDto::class))],
+        description = "Returns the list of current and future pay rates",
+        content = [Content(mediaType = "application/json", array = ArraySchema(schema = Schema(implementation = PayRateDto::class)))],
       ),
       ApiResponse(
         responseCode = "400",
