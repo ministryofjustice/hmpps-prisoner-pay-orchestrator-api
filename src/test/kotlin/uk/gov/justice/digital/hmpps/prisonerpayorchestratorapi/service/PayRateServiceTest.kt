@@ -11,7 +11,6 @@ import uk.gov.justice.digital.hmpps.prisonerpayorchestratorapi.helper.UUID1
 import uk.gov.justice.digital.hmpps.prisonerpayorchestratorapi.helper.UUID2
 import uk.gov.justice.digital.hmpps.prisonerpayorchestratorapi.helper.payRate
 import java.time.LocalDate
-import java.time.LocalDateTime
 
 class PayRateServiceTest {
   private val prisonerPayApiClient: PrisonerPayApiClient = mock()
@@ -22,42 +21,21 @@ class PayRateServiceTest {
     val payRates = listOf(
       payRate(
         id = UUID1,
-        prisonCode = "RSI",
         startDate = LocalDate.of(2026, 2, 2),
         rate = 100,
-        createdDateTime = LocalDateTime.of(2026, 2, 1, 10, 0),
       ),
       payRate(
         id = UUID2,
-        prisonCode = "RSI",
         startDate = LocalDate.of(2026, 1, 27),
         rate = 80,
-        createdDateTime = LocalDateTime.of(2026, 1, 20, 10, 0),
       ),
     )
 
     whenever(prisonerPayApiClient.getPrisonPayRates(PENTONVILLE))
       .thenReturn(payRates)
 
-    val result = payRateService.getCurrentAndFuturePayRates(PENTONVILLE)
-
-    with(result) {
-      assertThat(this).hasSize(2)
-
-      with(this[0]) {
-        assertThat(id).isEqualTo(UUID1)
-        assertThat(prisonCode).isEqualTo("RSI")
-        assertThat(rate).isEqualTo(100)
-        assertThat(startDate).isEqualTo(LocalDate.of(2026, 2, 2))
-      }
-
-      with(this[1]) {
-        assertThat(id).isEqualTo(UUID2)
-        assertThat(prisonCode).isEqualTo("RSI")
-        assertThat(rate).isEqualTo(80)
-        assertThat(startDate).isEqualTo(LocalDate.of(2026, 1, 27))
-      }
-    }
+    val result = payRateService.getPrisonPayRates(PENTONVILLE)
+    assertThat(result).usingRecursiveComparison().isEqualTo(payRates)
   }
 
   @Test
@@ -65,7 +43,7 @@ class PayRateServiceTest {
     whenever(prisonerPayApiClient.getPrisonPayRates(PENTONVILLE))
       .thenReturn(emptyList())
 
-    val result = payRateService.getCurrentAndFuturePayRates(PENTONVILLE)
+    val result = payRateService.getPrisonPayRates(PENTONVILLE)
     assertThat(result).isEmpty()
   }
 }

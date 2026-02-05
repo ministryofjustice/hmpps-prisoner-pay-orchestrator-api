@@ -29,7 +29,7 @@ class PayRateIntegrationTest : IntegrationTestBase() {
     )
 
     prisonPayApi().stubGetPrisonPayRates(PENTONVILLE, payRates)
-    val result = getCurrentAndFuturePayRates(PENTONVILLE).successList<PayRateDto>()
+    val result = getPrisonPayRates(PENTONVILLE).successList<PayRateDto>()
 
     val expected = payRates.map { it.toModel() }
     assertThat(result).isEqualTo(expected)
@@ -38,20 +38,20 @@ class PayRateIntegrationTest : IntegrationTestBase() {
   @Test
   fun `should return empty list when no current or future long term sick pay rates exist`() {
     prisonPayApi().stubGetPrisonPayRates(PENTONVILLE, emptyList())
-    assertThat(getCurrentAndFuturePayRates(PENTONVILLE).successList<PayRateDto>()).isEmpty()
+    assertThat(getPrisonPayRates(PENTONVILLE).successList<PayRateDto>()).isEmpty()
   }
 
   @Test
   fun `getPayRates returns unauthorized when no bearer token`() {
-    getCurrentAndFuturePayRates(PENTONVILLE, includeBearerAuth = false).fail(HttpStatus.UNAUTHORIZED)
+    getPrisonPayRates(PENTONVILLE, includeBearerAuth = false).fail(HttpStatus.UNAUTHORIZED)
   }
 
   @Test
   fun `getPayRates returns forbidden when role is incorrect`() {
-    getCurrentAndFuturePayRates(PENTONVILLE, roles = listOf("ROLE_TEST")).fail(HttpStatus.FORBIDDEN)
+    getPrisonPayRates(PENTONVILLE, roles = listOf("ROLE_TEST")).fail(HttpStatus.FORBIDDEN)
   }
 
-  private fun getCurrentAndFuturePayRates(
+  private fun getPrisonPayRates(
     prisonCode: String,
     roles: List<String> = listOf("ROLE_PRISONER_PAY__PRISONER_PAY_UI"),
     includeBearerAuth: Boolean = true,

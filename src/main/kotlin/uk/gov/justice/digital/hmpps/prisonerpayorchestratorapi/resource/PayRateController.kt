@@ -44,9 +44,9 @@ class PayRateController(private val payRateService: PayRateService) {
       ),
     ],
   )
-  suspend fun getCurrentAndFuturePayRates(
+  suspend fun getPrisonPayRates(
     @PathVariable
     @Parameter(description = "The prison code")
     prisonCode: String,
-  ): List<PayRateDto> = payRateService.getCurrentAndFuturePayRates(prisonCode)
+  ): List<PayRateDto> = payRateService.getPrisonPayRates(prisonCode)
 }
