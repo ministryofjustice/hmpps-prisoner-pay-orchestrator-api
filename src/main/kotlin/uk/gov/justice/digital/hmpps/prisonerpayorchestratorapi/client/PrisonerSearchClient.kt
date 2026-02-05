@@ -5,15 +5,13 @@ import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.awaitBody
 import org.springframework.web.util.UriBuilder
+import kotlin.reflect.full.primaryConstructor
 
 @Component
 class PrisonerSearchClient(private val prisonerSearchWebClient: WebClient) {
-  private val responseFields = listOf(
-    "prisonerNumber",
-    "firstName",
-    "lastName",
-    "cellLocation",
-  ).joinToString(",")
+  private val responseFields by lazy {
+    Prisoner::class.primaryConstructor!!.parameters.joinToString(",") { it.name.toString() }
+  }
 
   suspend fun findByPrisonerNumber(prisonerNumber: String): Prisoner = prisonerSearchWebClient
     .get()
