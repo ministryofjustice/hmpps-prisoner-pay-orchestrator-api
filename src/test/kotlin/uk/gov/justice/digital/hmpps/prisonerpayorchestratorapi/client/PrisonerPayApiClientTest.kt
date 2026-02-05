@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Test
 import org.mockito.Spy
 import org.springframework.web.reactive.function.client.WebClient
 import uk.gov.justice.digital.hmpps.prisonerpayorchestratorapi.helper.PENTONVILLE
-import uk.gov.justice.digital.hmpps.prisonerpayorchestratorapi.helper.RISLEY_PRISON_CODE
 import uk.gov.justice.digital.hmpps.prisonerpayorchestratorapi.helper.UUID1
 import uk.gov.justice.digital.hmpps.prisonerpayorchestratorapi.helper.UUID2
 import uk.gov.justice.digital.hmpps.prisonerpayorchestratorapi.helper.payRate
@@ -82,23 +81,23 @@ class PrisonerPayApiClientTest {
     val payRates = listOf(
       payRate(
         id = UUID1,
-        prisonCode = "RSI",
+        prisonCode = "PVI",
         startDate = LocalDate.of(2026, 2, 2),
         rate = 100,
         createdDateTime = LocalDateTime.of(2026, 2, 1, 10, 0),
       ),
       payRate(
         id = UUID2,
-        prisonCode = "RSI",
+        prisonCode = "PVI",
         startDate = LocalDate.of(2026, 1, 27),
         rate = 80,
         createdDateTime = LocalDateTime.of(2026, 1, 20, 10, 0),
       ),
     )
 
-    server.stubGetCurrentAndFuturePayRate(RISLEY_PRISON_CODE, payRates)
+    server.stubGetPrisonPayRates(PENTONVILLE, payRates)
 
-    val result = client.getCurrentAndFuturePayRates(RISLEY_PRISON_CODE)
+    val result = client.getPrisonPayRates(PENTONVILLE)
 
     assertThat(result).isEqualTo(payRates)
   }

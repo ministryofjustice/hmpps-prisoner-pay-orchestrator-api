@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import uk.gov.justice.digital.hmpps.prisonerpayorchestratorapi.dto.PayRateDto
-import uk.gov.justice.digital.hmpps.prisonerpayorchestratorapi.helper.RISLEY_PRISON_CODE
+import uk.gov.justice.digital.hmpps.prisonerpayorchestratorapi.helper.PENTONVILLE
 import uk.gov.justice.digital.hmpps.prisonerpayorchestratorapi.helper.UUID1
 import uk.gov.justice.digital.hmpps.prisonerpayorchestratorapi.helper.UUID2
 import uk.gov.justice.digital.hmpps.prisonerpayorchestratorapi.helper.payRate
@@ -28,8 +28,8 @@ class PayRateIntegrationTest : IntegrationTestBase() {
       ),
     )
 
-    prisonPayApi().stubGetCurrentAndFuturePayRate(RISLEY_PRISON_CODE, payRates)
-    val result = getCurrentAndFuturePayRates(RISLEY_PRISON_CODE).successList<PayRateDto>()
+    prisonPayApi().stubGetPrisonPayRates(PENTONVILLE, payRates)
+    val result = getCurrentAndFuturePayRates(PENTONVILLE).successList<PayRateDto>()
 
     val expected = payRates.map { it.toModel() }
     assertThat(result).isEqualTo(expected)
@@ -37,18 +37,18 @@ class PayRateIntegrationTest : IntegrationTestBase() {
 
   @Test
   fun `should return empty list when no current or future long term sick pay rates exist`() {
-    prisonPayApi().stubGetCurrentAndFuturePayRate(RISLEY_PRISON_CODE, emptyList())
-    assertThat(getCurrentAndFuturePayRates(RISLEY_PRISON_CODE).successList<PayRateDto>()).isEmpty()
+    prisonPayApi().stubGetPrisonPayRates(PENTONVILLE, emptyList())
+    assertThat(getCurrentAndFuturePayRates(PENTONVILLE).successList<PayRateDto>()).isEmpty()
   }
 
   @Test
   fun `getPayRates returns unauthorized when no bearer token`() {
-    getCurrentAndFuturePayRates(RISLEY_PRISON_CODE, includeBearerAuth = false).fail(HttpStatus.UNAUTHORIZED)
+    getCurrentAndFuturePayRates(PENTONVILLE, includeBearerAuth = false).fail(HttpStatus.UNAUTHORIZED)
   }
 
   @Test
   fun `getPayRates returns forbidden when role is incorrect`() {
-    getCurrentAndFuturePayRates(RISLEY_PRISON_CODE, roles = listOf("ROLE_TEST")).fail(HttpStatus.FORBIDDEN)
+    getCurrentAndFuturePayRates(PENTONVILLE, roles = listOf("ROLE_TEST")).fail(HttpStatus.FORBIDDEN)
   }
 
   private fun getCurrentAndFuturePayRates(

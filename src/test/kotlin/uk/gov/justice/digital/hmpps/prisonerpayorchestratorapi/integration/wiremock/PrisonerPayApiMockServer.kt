@@ -47,7 +47,7 @@ class PrisonerPayAPIMockServer : MockServer(8762) {
     )
   }
 
-  fun stubGetCurrentAndFuturePayRate(prisonCode: String, response: List<PayRate>) {
+  fun stubGetPrisonPayRates(prisonCode: String, response: List<PayRate>) {
     stubFor(
       WireMock.get(urlPathEqualTo("/pay-rates/prison/$prisonCode"))
         .willReturn(

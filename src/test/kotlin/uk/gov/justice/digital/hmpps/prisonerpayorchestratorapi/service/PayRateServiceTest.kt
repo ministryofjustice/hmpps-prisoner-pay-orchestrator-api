@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import uk.gov.justice.digital.hmpps.prisonerpayorchestratorapi.client.PrisonerPayApiClient
-import uk.gov.justice.digital.hmpps.prisonerpayorchestratorapi.helper.RISLEY_PRISON_CODE
+import uk.gov.justice.digital.hmpps.prisonerpayorchestratorapi.helper.PENTONVILLE
 import uk.gov.justice.digital.hmpps.prisonerpayorchestratorapi.helper.UUID1
 import uk.gov.justice.digital.hmpps.prisonerpayorchestratorapi.helper.UUID2
 import uk.gov.justice.digital.hmpps.prisonerpayorchestratorapi.helper.payRate
@@ -36,10 +36,10 @@ class PayRateServiceTest {
       ),
     )
 
-    whenever(prisonerPayApiClient.getCurrentAndFuturePayRates(RISLEY_PRISON_CODE))
+    whenever(prisonerPayApiClient.getPrisonPayRates(PENTONVILLE))
       .thenReturn(payRates)
 
-    val result = payRateService.getCurrentAndFuturePayRates(RISLEY_PRISON_CODE)
+    val result = payRateService.getCurrentAndFuturePayRates(PENTONVILLE)
 
     with(result) {
       assertThat(this).hasSize(2)
@@ -62,10 +62,10 @@ class PayRateServiceTest {
 
   @Test
   fun `should return empty list when no pay rates exist`() = runTest {
-    whenever(prisonerPayApiClient.getCurrentAndFuturePayRates(RISLEY_PRISON_CODE))
+    whenever(prisonerPayApiClient.getPrisonPayRates(PENTONVILLE))
       .thenReturn(emptyList())
 
-    val result = payRateService.getCurrentAndFuturePayRates(RISLEY_PRISON_CODE)
+    val result = payRateService.getCurrentAndFuturePayRates(PENTONVILLE)
     assertThat(result).isEmpty()
   }
 }

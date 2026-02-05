@@ -9,5 +9,5 @@ import uk.gov.justice.digital.hmpps.prisonerpayorchestratorapi.mapping.toModel
 class PayRateService(
   private val prisonerPayApiClient: PrisonerPayApiClient,
 ) {
-  suspend fun getCurrentAndFuturePayRates(prisonCode: String): List<PayRateDto> = prisonerPayApiClient.getCurrentAndFuturePayRates(prisonCode).map { it.toModel() }
+  suspend fun getCurrentAndFuturePayRates(prisonCode: String): List<PayRateDto> = prisonerPayApiClient.getPrisonPayRates(prisonCode).map { it.toModel() }
 }
