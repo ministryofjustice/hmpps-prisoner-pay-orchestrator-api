@@ -30,4 +30,7 @@ data class PayRateDto(
 
   @Schema(description = "The user who created the pay rate", example = "USER1")
   val createdBy: String,
+
+  @Schema(description = "The number of prisoners on this pay rate", example = "20")
+  val prisonerCount: Int = 0,
 )

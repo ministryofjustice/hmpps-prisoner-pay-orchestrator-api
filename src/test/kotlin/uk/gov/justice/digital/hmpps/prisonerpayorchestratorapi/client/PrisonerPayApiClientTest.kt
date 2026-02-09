@@ -9,6 +9,7 @@ import org.springframework.web.reactive.function.client.WebClient
 import uk.gov.justice.digital.hmpps.prisonerpayorchestratorapi.helper.PENTONVILLE
 import uk.gov.justice.digital.hmpps.prisonerpayorchestratorapi.helper.UUID1
 import uk.gov.justice.digital.hmpps.prisonerpayorchestratorapi.helper.UUID2
+import uk.gov.justice.digital.hmpps.prisonerpayorchestratorapi.helper.clock
 import uk.gov.justice.digital.hmpps.prisonerpayorchestratorapi.helper.payRate
 import uk.gov.justice.digital.hmpps.prisonerpayorchestratorapi.helper.payStatusPeriod
 import uk.gov.justice.digital.hmpps.prisonerpayorchestratorapi.helper.today
@@ -77,21 +78,16 @@ class PrisonerPayApiClientTest {
   }
 
   @Test
-  fun `should retrieve current and future pay rates`() = runTest {
+  fun `should retrieve pay rates`() = runTest {
+    val today: LocalDate = LocalDate.now(clock)
     val payRates = listOf(
       payRate(
         id = UUID1,
-        prisonCode = "PVI",
-        startDate = LocalDate.of(2026, 2, 2),
-        rate = 100,
-        createdDateTime = LocalDateTime.of(2026, 2, 1, 10, 0),
+        startDate = today.minusDays(10),
       ),
       payRate(
         id = UUID2,
-        prisonCode = "PVI",
-        startDate = LocalDate.of(2026, 1, 27),
-        rate = 80,
-        createdDateTime = LocalDateTime.of(2026, 1, 20, 10, 0),
+        startDate = today.plusDays(10),
       ),
     )
 

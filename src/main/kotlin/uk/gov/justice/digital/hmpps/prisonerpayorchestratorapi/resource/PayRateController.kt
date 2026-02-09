@@ -30,7 +30,7 @@ class PayRateController(private val payRateService: PayRateService) {
   @PreAuthorize("hasRole('ROLE_PRISONER_PAY__PRISONER_PAY_UI')")
   @ResponseStatus(HttpStatus.OK)
   @Operation(
-    summary = "Retrieve all current and future pay rates",
+    summary = "Retrieve the pay rates",
     responses = [
       ApiResponse(
         responseCode = "200",

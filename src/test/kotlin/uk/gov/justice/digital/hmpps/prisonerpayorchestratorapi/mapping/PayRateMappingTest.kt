@@ -10,8 +10,7 @@ class PayRateMappingTest {
   @Test
   fun `should map from api response to dto`() {
     val payRate = payRate()
-    val payRateDto = payRate.toModel()
-
+    val payRateDto = payRate.toModel(prisonerCount = 5)
     with(payRateDto) {
       assertThat(id).isEqualTo(UUID1)
       assertThat(prisonCode).isEqualTo(payRate.prisonCode)
@@ -20,6 +19,7 @@ class PayRateMappingTest {
       assertThat(rate).isEqualTo(payRate.rate)
       assertThat(createdBy).isEqualTo(payRate.createdBy)
       assertThat(createdDateTime).isEqualTo(payRate.createdDateTime)
+      assertThat(prisonerCount).isEqualTo(5)
     }
   }
 }

@@ -3,7 +3,7 @@ package uk.gov.justice.digital.hmpps.prisonerpayorchestratorapi.mapping
 import uk.gov.justice.digital.hmpps.prisonerpayorchestratorapi.client.PayRate
 import uk.gov.justice.digital.hmpps.prisonerpayorchestratorapi.dto.PayRateDto
 
-internal fun PayRate.toModel(): PayRateDto = PayRateDto(
+internal fun PayRate.toModel(prisonerCount: Int = 0): PayRateDto = PayRateDto(
   id = id,
   prisonCode = prisonCode,
   type = type,
@@ -11,4 +11,5 @@ internal fun PayRate.toModel(): PayRateDto = PayRateDto(
   rate = rate,
   createdDateTime = createdDateTime,
   createdBy = createdBy,
+  prisonerCount = prisonerCount,
 )

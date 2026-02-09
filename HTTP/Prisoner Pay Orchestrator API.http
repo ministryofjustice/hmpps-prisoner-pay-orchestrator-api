@@ -29,5 +29,5 @@ Authorization: Bearer {{$auth.token("auth-token")}}
 ### Get a list of current and future pay rates
 
 // @no-log
-GET {{ baseUrl }}/pay-rates/prison/RSI
+GET {{ baseUrl }}/pay-rates/prison/BCI
 Authorization: Bearer {{$auth.token("auth-token")}}

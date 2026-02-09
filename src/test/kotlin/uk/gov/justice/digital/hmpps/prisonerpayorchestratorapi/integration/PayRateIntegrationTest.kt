@@ -1,7 +1,9 @@
 package uk.gov.justice.digital.hmpps.prisonerpayorchestratorapi.integration
 
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.mockito.kotlin.whenever
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import uk.gov.justice.digital.hmpps.prisonerpayorchestratorapi.dto.PayRateDto
@@ -9,36 +11,86 @@ import uk.gov.justice.digital.hmpps.prisonerpayorchestratorapi.helper.PENTONVILL
 import uk.gov.justice.digital.hmpps.prisonerpayorchestratorapi.helper.UUID1
 import uk.gov.justice.digital.hmpps.prisonerpayorchestratorapi.helper.UUID2
 import uk.gov.justice.digital.hmpps.prisonerpayorchestratorapi.helper.payRate
+import uk.gov.justice.digital.hmpps.prisonerpayorchestratorapi.helper.payStatusPeriod
 import uk.gov.justice.digital.hmpps.prisonerpayorchestratorapi.mapping.toModel
+import java.time.Instant
 import java.time.LocalDate
 
 class PayRateIntegrationTest : IntegrationTestBase() {
-  @Test
-  fun `should retrieve pay rates`() {
-    val payRates = listOf(
-      payRate(
-        id = UUID1,
-        startDate = LocalDate.of(2026, 1, 20),
-        rate = 100,
-      ),
-      payRate(
-        id = UUID2,
-        startDate = LocalDate.of(2026, 5, 1),
-        rate = 80,
-      ),
-    )
+  private lateinit var today: LocalDate
 
-    prisonPayApi().stubGetPrisonPayRates(PENTONVILLE, payRates)
-    val result = getPrisonPayRates(PENTONVILLE).successList<PayRateDto>()
-
-    val expected = payRates.map { it.toModel() }
-    assertThat(result).isEqualTo(expected)
+  @BeforeEach
+  fun clockSetup() {
+    whenever(clock.instant()).thenReturn(Instant.parse("2026-02-01T00:00:00.00Z"))
+    today = LocalDate.now(clock)
   }
 
   @Test
-  fun `should return empty list when no current or future long term sick pay rates exist`() {
-    prisonPayApi().stubGetPrisonPayRates(PENTONVILLE, emptyList())
-    assertThat(getPrisonPayRates(PENTONVILLE).successList<PayRateDto>()).isEmpty()
+  fun `should retrieve pay rates with prisoner counts`() {
+    val payRates = listOf(
+      payRate(
+        id = UUID1,
+        startDate = today.minusDays(20),
+      ),
+      payRate(
+        id = UUID2,
+        startDate = today.plusDays(20),
+      ),
+    )
+
+    val payStatusPeriods = listOf(
+      payStatusPeriod(startDate = today.minusDays(20)),
+      payStatusPeriod(startDate = today.minusDays(20)),
+    )
+
+    prisonPayApi().apply {
+      stubGetPrisonPayRates(PENTONVILLE, payRates)
+      stubSearch(PENTONVILLE, today, true, payStatusPeriods)
+    }
+
+    val result = getPrisonPayRates(PENTONVILLE).successList<PayRateDto>()
+    assertThat(result).isEqualTo(
+      payRates.map { rate ->
+        rate.toModel(
+          prisonerCount = payStatusPeriods.count {
+            it.type == rate.type && it.startDate == rate.startDate
+          },
+        )
+      },
+    )
+  }
+
+  @Test
+  fun `should return prisoner count as zero when no matching pay status periods exist`() {
+    val payRates = listOf(
+      payRate(
+        id = UUID1,
+        startDate = today.minusDays(20),
+      ),
+    )
+
+    val payStatusPeriods = listOf(
+      payStatusPeriod(startDate = today.minusDays(10)),
+    )
+
+    prisonPayApi().apply {
+      stubGetPrisonPayRates(PENTONVILLE, payRates)
+      stubSearch(PENTONVILLE, today, true, payStatusPeriods)
+    }
+
+    val result = getPrisonPayRates(PENTONVILLE).successList<PayRateDto>()
+    assertThat(result.single().prisonerCount).isEqualTo(0)
+  }
+
+  @Test
+  fun `should return empty list when no pay rates exist`() {
+    prisonPayApi().apply {
+      stubGetPrisonPayRates(PENTONVILLE, emptyList())
+      stubSearch(PENTONVILLE, today, true, emptyList())
+    }
+
+    val result = getPrisonPayRates(PENTONVILLE).successList<PayRateDto>()
+    assertThat(result).isEmpty()
   }
 
   @Test

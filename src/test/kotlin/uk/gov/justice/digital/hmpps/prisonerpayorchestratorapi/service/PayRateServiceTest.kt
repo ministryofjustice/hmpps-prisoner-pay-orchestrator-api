@@ -9,41 +9,100 @@ import uk.gov.justice.digital.hmpps.prisonerpayorchestratorapi.client.PrisonerPa
 import uk.gov.justice.digital.hmpps.prisonerpayorchestratorapi.helper.PENTONVILLE
 import uk.gov.justice.digital.hmpps.prisonerpayorchestratorapi.helper.UUID1
 import uk.gov.justice.digital.hmpps.prisonerpayorchestratorapi.helper.UUID2
+import uk.gov.justice.digital.hmpps.prisonerpayorchestratorapi.helper.clock
 import uk.gov.justice.digital.hmpps.prisonerpayorchestratorapi.helper.payRate
+import uk.gov.justice.digital.hmpps.prisonerpayorchestratorapi.helper.payStatusPeriod
+import uk.gov.justice.digital.hmpps.prisonerpayorchestratorapi.mapping.toModel
 import java.time.LocalDate
 
 class PayRateServiceTest {
   private val prisonerPayApiClient: PrisonerPayApiClient = mock()
-  private val payRateService = PayRateService(prisonerPayApiClient)
+  private val payRateService = PayRateService(prisonerPayApiClient, clock)
+  val today: LocalDate = LocalDate.now(clock)
 
   @Test
-  fun `should retrieve current and future pay rates`() = runTest {
+  fun `should return pay rates with correct prisoner counts`() = runTest {
     val payRates = listOf(
       payRate(
         id = UUID1,
-        startDate = LocalDate.of(2026, 2, 2),
-        rate = 100,
+        startDate = today.minusDays(10),
       ),
       payRate(
         id = UUID2,
-        startDate = LocalDate.of(2026, 1, 27),
-        rate = 80,
+        startDate = today.plusDays(25),
       ),
     )
 
-    whenever(prisonerPayApiClient.getPrisonPayRates(PENTONVILLE))
-      .thenReturn(payRates)
+    val payStatusPeriods = listOf(
+      payStatusPeriod(startDate = today.minusDays(10)),
+      payStatusPeriod(startDate = today.minusDays(10)),
+    )
 
-    val result = payRateService.getPrisonPayRates(PENTONVILLE)
-    assertThat(result).usingRecursiveComparison().isEqualTo(payRates)
+    prisonerPayApiClient.apply {
+      whenever(getPrisonPayRates(PENTONVILLE)).thenReturn(payRates)
+      whenever(search(PENTONVILLE, LocalDate.now(clock), true))
+        .thenReturn(payStatusPeriods)
+    }
+
+    payRateService.getPrisonPayRates(PENTONVILLE).let { result ->
+      assertThat(result).hasSize(2)
+      assertThat(result).isEqualTo(
+        payRates.map { rate ->
+          rate.toModel(
+            prisonerCount = payStatusPeriods.count { it.type == rate.type && it.startDate == rate.startDate },
+          )
+        },
+      )
+    }
   }
 
   @Test
   fun `should return empty list when no pay rates exist`() = runTest {
-    whenever(prisonerPayApiClient.getPrisonPayRates(PENTONVILLE))
-      .thenReturn(emptyList())
+    prisonerPayApiClient.apply {
+      whenever(getPrisonPayRates(PENTONVILLE)).thenReturn(emptyList())
+      whenever(search(PENTONVILLE, LocalDate.now(clock), true))
+        .thenReturn(emptyList())
+    }
 
     val result = payRateService.getPrisonPayRates(PENTONVILLE)
     assertThat(result).isEmpty()
+  }
+
+  @Test
+  fun `should return pay rates with zero prisoner count when no pay status periods exist`() = runTest {
+    val payRates = listOf(
+      payRate(id = UUID1),
+      payRate(id = UUID2),
+    )
+
+    prisonerPayApiClient.apply {
+      whenever(getPrisonPayRates(PENTONVILLE)).thenReturn(payRates)
+      whenever(search(PENTONVILLE, LocalDate.now(clock), true))
+        .thenReturn(emptyList())
+    }
+
+    val result = payRateService.getPrisonPayRates(PENTONVILLE)
+    assertThat(result).allMatch { it.prisonerCount == 0 }
+  }
+
+  @Test
+  fun `should return prisoner count as zero for future pay rates`() = runTest {
+    val payRates = listOf(
+      payRate(id = UUID1, startDate = today.plusDays(10)),
+      payRate(id = UUID1, startDate = today.plusDays(20)),
+    )
+
+    val payStatusPeriods = listOf(
+      payStatusPeriod(startDate = today),
+    )
+
+    prisonerPayApiClient.apply {
+      whenever(getPrisonPayRates(PENTONVILLE)).thenReturn(payRates)
+      whenever(search(PENTONVILLE, LocalDate.now(clock), true))
+        .thenReturn(payStatusPeriods)
+    }
+
+    val result = payRateService.getPrisonPayRates(PENTONVILLE)
+    assertThat(result).allMatch { it.prisonerCount == 0 }
   }
 }
