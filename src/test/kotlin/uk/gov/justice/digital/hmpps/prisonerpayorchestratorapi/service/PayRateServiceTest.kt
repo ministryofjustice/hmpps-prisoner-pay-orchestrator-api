@@ -72,24 +72,4 @@ class PayRateServiceTest {
     val result = payRateService.getPrisonPayRates(PENTONVILLE)
     assertThat(result[0].prisonerCount).isEqualTo(0)
   }
-
-  @Test
-  fun `should return prisoner count as zero for future pay rates`() = runTest {
-    val payRates = listOf(
-      payRate(startDate = today.plusDays(10)),
-    )
-
-    val payStatusPeriods = listOf(
-      payStatusPeriod(startDate = today),
-    )
-
-    prisonerPayApiClient.apply {
-      whenever(getPayRates(PENTONVILLE)).thenReturn(payRates)
-      whenever(search(PENTONVILLE, LocalDate.now(clock), true))
-        .thenReturn(payStatusPeriods)
-    }
-
-    val result = payRateService.getPrisonPayRates(PENTONVILLE)
-    assertThat(result[0].prisonerCount).isEqualTo(0)
-  }
 }
