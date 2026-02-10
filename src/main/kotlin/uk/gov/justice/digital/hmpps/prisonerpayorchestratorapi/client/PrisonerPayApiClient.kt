@@ -24,8 +24,8 @@ class PrisonerPayApiClient(private val prisonerPayWebClient: WebClient) {
     .retrieve()
     .awaitBody()
 
-  suspend fun getPrisonPayRates(prisonCode: String): List<PayRate> = prisonerPayWebClient.get()
-    .uri("/pay-rates/prison/$prisonCode", prisonCode)
+  suspend fun getPayRates(prisonCode: String): List<PayRate> = prisonerPayWebClient.get()
+    .uri("/pay-rates/prison/{prisonCode}", prisonCode)
     .retrieve()
     .awaitBody()
 }

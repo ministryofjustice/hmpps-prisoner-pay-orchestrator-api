@@ -15,27 +15,27 @@ class PayRateService(
   suspend fun getPrisonPayRates(prisonCode: String): List<PayRateDto> {
     val today = LocalDate.now(clock)
 
-    val payRates = prisonerPayApiClient.getPrisonPayRates(prisonCode)
+    val payRates = prisonerPayApiClient.getPayRates(prisonCode)
 
-    // Retrieve active pay status periods
+    // Active LTS prisoners as of today (endDate already handled by activeOnly=true)
     val payStatusPeriods = prisonerPayApiClient.search(
       prisonCode = prisonCode,
       latestStartDate = today,
       activeOnly = true,
     )
 
-    // Count prisoners by pay status type + startDate
-    val prisonerCountsByTypeAndStartDate = payStatusPeriods
-      .groupBy { it.type to it.startDate }
+    // Count active prisoners by pay status type
+    val activePrisonerCountByType = payStatusPeriods
+      .groupBy { it.type }
       .mapValues { it.value.size }
 
-    // Merging counts
     return payRates.map { payRate ->
-      payRate.toModel(
-        prisonerCount = prisonerCountsByTypeAndStartDate[
-          payRate.type to payRate.startDate,
-        ] ?: 0, // future start dates will get count as 0 until they are active
-      )
+      // Only assign prisonerCount to the current past rate of this type
+      val prisonerCount = (payRate.startDate <= today).let { isPastOrCurrent ->
+        if (isPastOrCurrent) activePrisonerCountByType[payRate.type] ?: 0 else 0
+      }
+
+      payRate.toModel(prisonerCount)
     }
   }
 }

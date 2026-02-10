@@ -82,7 +82,6 @@ class PrisonerPayApiClientTest {
     val today: LocalDate = LocalDate.now(clock)
     val payRates = listOf(
       payRate(
-        id = UUID1,
         startDate = today.minusDays(10),
       ),
       payRate(
@@ -93,7 +92,7 @@ class PrisonerPayApiClientTest {
 
     server.stubGetPrisonPayRates(PENTONVILLE, payRates)
 
-    val result = client.getPrisonPayRates(PENTONVILLE)
+    val result = client.getPayRates(PENTONVILLE)
 
     assertThat(result).isEqualTo(payRates)
   }
