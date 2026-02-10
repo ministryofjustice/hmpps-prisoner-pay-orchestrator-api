@@ -37,7 +37,7 @@ class PayRateServiceTest {
 
     prisonerPayApiClient.apply {
       whenever(getPayRates(PENTONVILLE)).thenReturn(payRates)
-      whenever(search(PENTONVILLE, LocalDate.now(clock), true))
+      whenever(search(PENTONVILLE, today, true))
         .thenReturn(payStatusPeriods)
     }
 
@@ -51,7 +51,7 @@ class PayRateServiceTest {
   fun `should return empty list when no pay rates exist`() = runTest {
     prisonerPayApiClient.apply {
       whenever(getPayRates(PENTONVILLE)).thenReturn(emptyList())
-      whenever(search(PENTONVILLE, LocalDate.now(clock), true))
+      whenever(search(PENTONVILLE, today, true))
         .thenReturn(emptyList())
     }
 
@@ -65,7 +65,7 @@ class PayRateServiceTest {
 
     prisonerPayApiClient.apply {
       whenever(getPayRates(PENTONVILLE)).thenReturn(payRates)
-      whenever(search(PENTONVILLE, LocalDate.now(clock), true))
+      whenever(search(PENTONVILLE, today, true))
         .thenReturn(emptyList())
     }
 

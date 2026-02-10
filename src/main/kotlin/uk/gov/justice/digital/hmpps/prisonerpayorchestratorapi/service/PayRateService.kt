@@ -26,8 +26,8 @@ class PayRateService(
 
     // Count active prisoners by pay status type
     val activePrisonerCountByType = payStatusPeriods
-      .groupBy { it.type }
-      .mapValues { it.value.size }
+      .groupingBy { it.type }
+      .eachCount()
 
     return payRates.map { payRate ->
       // Only assign prisonerCount to the current past rate of this type
