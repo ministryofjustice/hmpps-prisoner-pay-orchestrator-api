@@ -19,6 +19,7 @@ cmake-build-debug/
 # IntelliJ
 out/
 *.iml
+http-client.private.env.json
 
 # mpeltonen/sbt-idea plugin
 .idea_modules/
@@ -74,3 +75,6 @@ sonar-project.properties
 
 #Everything else:
 .DS_Store
+
+# env file
+.env

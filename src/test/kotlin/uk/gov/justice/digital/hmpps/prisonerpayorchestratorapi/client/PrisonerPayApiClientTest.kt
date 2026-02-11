@@ -8,9 +8,13 @@ import org.mockito.Spy
 import org.springframework.web.reactive.function.client.WebClient
 import uk.gov.justice.digital.hmpps.prisonerpayorchestratorapi.helper.PENTONVILLE
 import uk.gov.justice.digital.hmpps.prisonerpayorchestratorapi.helper.UUID1
+import uk.gov.justice.digital.hmpps.prisonerpayorchestratorapi.helper.UUID2
+import uk.gov.justice.digital.hmpps.prisonerpayorchestratorapi.helper.clock
+import uk.gov.justice.digital.hmpps.prisonerpayorchestratorapi.helper.payRate
 import uk.gov.justice.digital.hmpps.prisonerpayorchestratorapi.helper.payStatusPeriod
 import uk.gov.justice.digital.hmpps.prisonerpayorchestratorapi.helper.today
 import uk.gov.justice.digital.hmpps.prisonerpayorchestratorapi.integration.wiremock.PrisonerPayAPIMockServer
+import java.time.LocalDate
 import java.time.LocalDateTime
 
 class PrisonerPayApiClientTest {
@@ -71,5 +75,25 @@ class PrisonerPayApiClientTest {
     val result = client.search(PENTONVILLE, latestStartDate, false)
 
     assertThat(result).isEqualTo(payStatusPeriods)
+  }
+
+  @Test
+  fun `should retrieve pay rates`() = runTest {
+    val today: LocalDate = LocalDate.now(clock)
+    val payRates = listOf(
+      payRate(
+        startDate = today.minusDays(10),
+      ),
+      payRate(
+        id = UUID2,
+        startDate = today.plusDays(10),
+      ),
+    )
+
+    server.stubGetPrisonPayRates(PENTONVILLE, payRates)
+
+    val result = client.getPayRates(PENTONVILLE)
+
+    assertThat(result).isEqualTo(payRates)
   }
 }
