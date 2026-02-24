@@ -49,6 +49,8 @@ data class PayRate(
   val rate: Int,
   val createdDateTime: LocalDateTime,
   val createdBy: String,
+  val updatedDateTime: LocalDateTime? = null,
+  val updatedBy: String? = null,
 )
 
 enum class PayStatusType {

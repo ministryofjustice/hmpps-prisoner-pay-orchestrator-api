@@ -20,6 +20,8 @@ class PayRateMappingTest {
       assertThat(createdBy).isEqualTo(payRate.createdBy)
       assertThat(createdDateTime).isEqualTo(payRate.createdDateTime)
       assertThat(prisonerCount).isEqualTo(5)
+      assertThat(updatedDateTime).isEqualTo(payRate.updatedDateTime)
+      assertThat(updatedBy).isEqualTo(payRate.updatedBy)
     }
   }
 }

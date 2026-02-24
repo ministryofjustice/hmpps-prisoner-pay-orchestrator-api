@@ -14,6 +14,8 @@ internal fun payRate(
   rate: Int = 99,
   createdBy: String = "TEST_USER",
   createdDateTime: LocalDateTime = LocalDateTime.of(2026, 1, 1, 10, 0),
+  updatedDateTime: LocalDateTime? = null,
+  updatedBy: String? = null,
 ) = PayRate(
   id = id,
   prisonCode = prisonCode,
@@ -22,4 +24,6 @@ internal fun payRate(
   rate = rate,
   createdBy = createdBy,
   createdDateTime = createdDateTime,
+  updatedDateTime = updatedDateTime,
+  updatedBy = updatedBy,
 )
