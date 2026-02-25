@@ -11,5 +11,7 @@ internal fun PayRate.toModel(prisonerCount: Int = 0): PayRateDto = PayRateDto(
   rate = rate,
   createdDateTime = createdDateTime,
   createdBy = createdBy,
+  updatedDateTime = updatedDateTime,
+  updatedBy = updatedBy,
   prisonerCount = prisonerCount,
 )
