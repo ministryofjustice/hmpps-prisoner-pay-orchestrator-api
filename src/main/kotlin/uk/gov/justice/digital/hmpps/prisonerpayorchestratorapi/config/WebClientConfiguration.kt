@@ -1,10 +1,13 @@
 package uk.gov.justice.digital.hmpps.prisonerpayorchestratorapi.config
 
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.boot.web.reactive.function.client.WebClientCustomizer
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.http.client.reactive.ReactorClientHttpConnector
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager
 import org.springframework.web.reactive.function.client.WebClient
+import reactor.netty.http.client.HttpClient
 import uk.gov.justice.hmpps.kotlin.auth.authorisedWebClient
 import uk.gov.justice.hmpps.kotlin.auth.healthWebClient
 import java.time.Duration
@@ -17,6 +20,11 @@ class WebClientConfiguration(
   @param:Value($$"${api.health-timeout:2s}") val healthTimeout: Duration,
   @param:Value($$"${api.timeout:10s}") val timeout: Duration,
 ) {
+  @Bean
+  fun proxyWebClientCustomizer(): WebClientCustomizer = WebClientCustomizer { builder ->
+    builder.clientConnector(ReactorClientHttpConnector(HttpClient.create().useSystemProperties()))
+  }
+
   // HMPPS Auth health ping is required if your service calls HMPPS Auth to get a token to call other services
   @Bean
   fun hmppsAuthHealthWebClient(builder: WebClient.Builder): WebClient = builder.healthWebClient(hmppsAuthBaseUri, healthTimeout)
