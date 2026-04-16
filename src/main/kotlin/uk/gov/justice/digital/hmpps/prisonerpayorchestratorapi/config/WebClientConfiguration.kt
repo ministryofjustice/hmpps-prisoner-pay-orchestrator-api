@@ -1,13 +1,14 @@
 package uk.gov.justice.digital.hmpps.prisonerpayorchestratorapi.config
 
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.boot.web.reactive.function.client.WebClientCustomizer
+import org.springframework.boot.webclient.WebClientCustomizer
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.client.reactive.ReactorClientHttpConnector
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager
 import org.springframework.web.reactive.function.client.WebClient
 import reactor.netty.http.client.HttpClient
+import reactor.netty.transport.ProxyProvider
 import uk.gov.justice.hmpps.kotlin.auth.authorisedWebClient
 import uk.gov.justice.hmpps.kotlin.auth.healthWebClient
 import java.time.Duration
@@ -22,7 +23,26 @@ class WebClientConfiguration(
 ) {
   @Bean
   fun proxyWebClientCustomizer(): WebClientCustomizer = WebClientCustomizer { builder ->
-    builder.clientConnector(ReactorClientHttpConnector(HttpClient.create().useSystemProperties()))
+    proxyConnector()?.let { builder.clientConnector(it) }
+  }
+
+  private fun proxyConnector(): ReactorClientHttpConnector? {
+    val proxyHost = System.getProperty("https.proxyHost") ?: System.getProperty("http.proxyHost") ?: return null
+    val proxyPort = (System.getProperty("https.proxyPort") ?: System.getProperty("http.proxyPort") ?: "3128").toInt()
+    val nonProxyHosts = System.getProperty("https.nonProxyHosts") ?: System.getProperty("http.nonProxyHosts")
+
+    val httpClient = HttpClient.create().proxy { proxy ->
+      val builder = proxy
+        .type(ProxyProvider.Proxy.HTTP)
+        .host(proxyHost)
+        .port(proxyPort)
+
+      if (!nonProxyHosts.isNullOrBlank()) {
+        builder.nonProxyHosts(nonProxyHosts)
+      }
+    }
+
+    return ReactorClientHttpConnector(httpClient)
   }
 
   // HMPPS Auth health ping is required if your service calls HMPPS Auth to get a token to call other services
