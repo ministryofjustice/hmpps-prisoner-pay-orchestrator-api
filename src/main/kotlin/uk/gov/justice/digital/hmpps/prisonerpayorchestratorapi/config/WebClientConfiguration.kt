@@ -13,6 +13,8 @@ import uk.gov.justice.hmpps.kotlin.auth.authorisedWebClient
 import uk.gov.justice.hmpps.kotlin.auth.healthWebClient
 import java.time.Duration
 
+private val regexMetaCharacters = setOf('\\', '.', '^', '$', '+', '?', '(', ')', '[', ']', '{', '}')
+
 @Configuration
 class WebClientConfiguration(
   @param:Value($$"${api.base.url.hmpps-auth}") val hmppsAuthBaseUri: String,
@@ -28,8 +30,9 @@ class WebClientConfiguration(
 
   private fun proxyConnector(): ReactorClientHttpConnector? {
     val proxyHost = System.getProperty("https.proxyHost") ?: System.getProperty("http.proxyHost") ?: return null
-    val proxyPort = (System.getProperty("https.proxyPort") ?: System.getProperty("http.proxyPort") ?: "3128").toInt()
-    val nonProxyHosts = System.getProperty("https.nonProxyHosts") ?: System.getProperty("http.nonProxyHosts")
+    val proxyPort = listOf(System.getProperty("https.proxyPort"), System.getProperty("http.proxyPort"))
+      .firstNotNullOfOrNull { it?.toIntOrNull() } ?: 3128
+    val nonProxyHosts = toReactorNonProxyHostsPattern(System.getProperty("https.nonProxyHosts") ?: System.getProperty("http.nonProxyHosts"))
 
     val httpClient = HttpClient.create().proxy { proxy ->
       val builder = proxy
@@ -37,7 +40,7 @@ class WebClientConfiguration(
         .host(proxyHost)
         .port(proxyPort)
 
-      if (!nonProxyHosts.isNullOrBlank()) {
+      if (nonProxyHosts != null) {
         builder.nonProxyHosts(nonProxyHosts)
       }
     }
@@ -60,4 +63,25 @@ class WebClientConfiguration(
 
   @Bean
   fun prisonerSearchWebClient(authorizedClientManager: OAuth2AuthorizedClientManager, builder: WebClient.Builder) = builder.authorisedWebClient(authorizedClientManager, "prisoner-search", prisonerSearchBaseUri, timeout)
+}
+
+internal fun toReactorNonProxyHostsPattern(nonProxyHosts: String?): String? {
+  if (nonProxyHosts.isNullOrBlank()) return null
+
+  val patterns = nonProxyHosts.split('|')
+    .map { it.trim() }
+    .filter { it.isNotEmpty() }
+    .map { "^${it.toReactorRegexFragment()}$" }
+
+  return patterns.takeIf { it.isNotEmpty() }?.joinToString("|")
+}
+
+private fun String.toReactorRegexFragment(): String = buildString {
+  this@toReactorRegexFragment.forEach { char ->
+    when {
+      char == '*' -> append(".*")
+      char in regexMetaCharacters -> append('\\').append(char)
+      else -> append(char)
+    }
+  }
 }
