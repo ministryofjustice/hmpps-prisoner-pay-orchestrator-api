@@ -31,7 +31,7 @@ generic-service:
     hmpps-prisoner-pay-orchestrator-api-client-creds:
       API_CLIENT_ID: "API_CLIENT_ID"
       API_CLIENT_SECRET: "API_CLIENT_SECRET"
-    # Share the envoy proxy defined by the UI's hmpps tf template
+    # Share the envoy proxy settings defined by the UI's hmpps tf template
     hmpps-prisoner-pay-ui-envoy-https-proxy-env:
       JAVA_PROXY_TOOL_OPTIONS: "JAVA_PROXY_TOOL_OPTIONS"
       HTTP_PROXY: "HTTP_PROXY"
