@@ -1,7 +1,7 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "10.3.1"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "10.4.0"
   kotlin("plugin.spring") version "2.4.0"
 }
 
@@ -23,7 +23,7 @@ dependencies {
   testImplementation("org.wiremock:wiremock-standalone:3.13.2")
   testImplementation("io.mockk:mockk:1.14.11")
   testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.11.0")
-  testImplementation("io.swagger.parser.v3:swagger-parser:2.1.43") {
+  testImplementation("io.swagger.parser.v3:swagger-parser:2.1.44") {
     exclude(group = "io.swagger.core.v3")
   }
 }
