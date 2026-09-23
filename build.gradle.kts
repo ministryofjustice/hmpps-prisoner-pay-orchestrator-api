@@ -1,8 +1,8 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "11.0.7"
-  kotlin("plugin.spring") version "2.4.10"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "11.0.9"
+  kotlin("plugin.spring") version "2.4.20"
 }
 
 configurations {
@@ -10,15 +10,15 @@ configurations {
 }
 
 dependencies {
-  implementation("uk.gov.justice.service.hmpps:hmpps-kotlin-spring-boot-starter:3.0.1")
+  implementation("uk.gov.justice.service.hmpps:hmpps-kotlin-spring-boot-starter:3.0.2")
   implementation("org.springframework.boot:spring-boot-starter-webflux")
   implementation("org.springframework.boot:spring-boot-starter-webclient")
-  implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:3.1.0")
+  implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:3.1.1")
   implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.11.0")
   implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:1.11.0")
   implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor:1.11.0")
 
-  testImplementation("uk.gov.justice.service.hmpps:hmpps-kotlin-spring-boot-starter-test:3.0.1")
+  testImplementation("uk.gov.justice.service.hmpps:hmpps-kotlin-spring-boot-starter-test:3.0.2")
   testImplementation("org.springframework.boot:spring-boot-starter-webflux-test")
   testImplementation("org.wiremock:wiremock-standalone:3.13.2")
   testImplementation("io.mockk:mockk:1.14.11")
