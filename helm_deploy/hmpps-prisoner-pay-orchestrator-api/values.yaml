@@ -14,10 +14,9 @@ generic-service:
     host: app-hostname.local # override per environment
     tlsSecretName: prisoner-pay-orchestrator-api-cert
     modsecurity_enabled: true
+    modsecurity_audit_enabled: true
+    modsecurity_github_team: "activities-and-appointments"
     modsecurity_snippet: |
-      SecAuditEngine On
-      SecRuleEngine DetectionOnly
-      SecDefaultAction "phase:2,pass,log,tag:github_team=activities-and-appointments,tag:namespace={{ .Release.Namespace }}"
       # Default is only GET HEAD POST OPTIONS so need to include PUT.
       SecAction "id:900200,phase:1,nolog,pass,t:none,setvar:tx.allowed_methods=GET HEAD POST OPTIONS PUT"
 
