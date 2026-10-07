@@ -6,6 +6,14 @@ plugins {
 }
 
 configurations {
+  all {
+    resolutionStrategy.eachDependency {
+      if (requested.group == "org.apache.tomcat.embed" && requested.name.startsWith("tomcat-embed")) {
+        useVersion("11.0.26")
+        because("Fixes CVE-2026-76183 in embedded Tomcat websocket")
+      }
+    }
+  }
   testImplementation { exclude(group = "org.junit.vintage") }
 }
 
