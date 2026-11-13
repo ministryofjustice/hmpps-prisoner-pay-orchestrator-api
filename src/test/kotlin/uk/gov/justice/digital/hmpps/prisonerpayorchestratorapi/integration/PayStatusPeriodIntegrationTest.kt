@@ -167,6 +167,25 @@ class PayStatusPeriodIntegrationTest : IntegrationTestBase() {
   }
 
   @Test
+  fun `search returns bad request when type is invalid`() {
+    webTestClient
+      .get()
+      .uri { uriBuilder ->
+        uriBuilder
+          .path("/pay-status-periods")
+          .queryParam("prisonCode", PENTONVILLE)
+          .queryParam("latestStartDate", today())
+          .queryParam("activeOnly", true)
+          .queryParam("type", "UNKNOWN")
+          .build()
+      }
+      .accept(MediaType.APPLICATION_JSON)
+      .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_PAY__PRISONER_PAY_UI")))
+      .exchange()
+      .fail(HttpStatus.BAD_REQUEST)
+  }
+
+  @Test
   fun `search returns unauthorized when no bearer token`() {
     searchPayStatusPeriods(includeBearerAuth = false).fail(HttpStatus.UNAUTHORIZED)
   }
