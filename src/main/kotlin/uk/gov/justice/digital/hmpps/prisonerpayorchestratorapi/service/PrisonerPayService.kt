@@ -2,6 +2,7 @@ package uk.gov.justice.digital.hmpps.prisonerpayorchestratorapi.service
 
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import uk.gov.justice.digital.hmpps.prisonerpayorchestratorapi.client.PayStatusType
 import uk.gov.justice.digital.hmpps.prisonerpayorchestratorapi.client.PrisonerPayApiClient
 import uk.gov.justice.digital.hmpps.prisonerpayorchestratorapi.client.PrisonerSearchClient
 import uk.gov.justice.digital.hmpps.prisonerpayorchestratorapi.dto.PayStatusPeriod
@@ -24,11 +25,12 @@ class PrisonerPayService(
     }
   }
 
-  suspend fun search(prisonCode: String, latestStartDate: LocalDate, activeOnly: Boolean): List<PayStatusPeriod> {
+  suspend fun search(prisonCode: String, type: PayStatusType? = null, latestStartDate: LocalDate, activeOnly: Boolean): List<PayStatusPeriod> {
     val payStatusPeriods = prisonerPayApiClient.search(
       prisonCode = prisonCode,
       latestStartDate = latestStartDate,
       activeOnly = activeOnly,
+      type = type,
     )
 
     val prisonerNumbers = payStatusPeriods.map { it.prisonerNumber }.toSet()

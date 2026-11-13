@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
+import uk.gov.justice.digital.hmpps.prisonerpayorchestratorapi.client.PayStatusType
 import uk.gov.justice.digital.hmpps.prisonerpayorchestratorapi.dto.PayStatusPeriod
 import uk.gov.justice.digital.hmpps.prisonerpayorchestratorapi.service.PrisonerPayService
 import uk.gov.justice.hmpps.kotlin.common.ErrorResponse
@@ -83,8 +84,11 @@ class PayStatusPeriodController(private val prisonerPayService: PrisonerPayServi
     @RequestParam("prisonCode", required = true)
     @Parameter(description = "The prison code", required = true, example = "PVI")
     prisonCode: String,
+    @RequestParam(value = "type", required = false)
+    @Parameter(description = "The type of pay status period", example = "LONG_TERM_SICK")
+    type: PayStatusType? = null,
     @RequestParam(value = "activeOnly", required = false, defaultValue = "true")
     @Parameter(description = "Whether to return results which are currently active, i.e. the end date is null or not before today", example = "true")
     activeOnly: Boolean = true,
-  ) = prisonerPayService.search(prisonCode, latestStartDate, activeOnly)
+  ) = prisonerPayService.search(prisonCode, type, latestStartDate, activeOnly)
 }

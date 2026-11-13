@@ -140,6 +140,52 @@ class PayStatusPeriodIntegrationTest : IntegrationTestBase() {
   }
 
   @Test
+  fun `search for pay status periods filtered by type`() {
+    val latestStartDate = today()
+    val payStatusPeriods = listOf(
+      payStatusPeriod(prisonerNumber = "A1111AA", type = PayStatusType.SHORT_TERM_SICK),
+    )
+    val prisoners = listOf(
+      prisoner(prisonerNumber = "A1111AA", firstName = "JOHN", lastName = "SMITH", cellLocation = "A-1-001"),
+    )
+
+    prisonPayApi().stubSearch(
+      prisonCode = PENTONVILLE,
+      latestStartDate = latestStartDate,
+      activeOnly = true,
+      type = PayStatusType.SHORT_TERM_SICK,
+      response = payStatusPeriods,
+    )
+    prisonSearchApi().stubSearchByPrisonerNumbers(setOf("A1111AA"), prisoners)
+
+    val result = searchPayStatusPeriods(latestStartDate, true, PENTONVILLE, type = PayStatusType.SHORT_TERM_SICK)
+      .successList<PayStatusPeriodDto>()
+
+    assertThat(result).hasSize(1)
+    assertThat(result[0].prisonerNumber).isEqualTo("A1111AA")
+    assertThat(result[0].type).isEqualTo(PayStatusType.SHORT_TERM_SICK)
+  }
+
+  @Test
+  fun `search returns bad request when type is invalid`() {
+    webTestClient
+      .get()
+      .uri { uriBuilder ->
+        uriBuilder
+          .path("/pay-status-periods")
+          .queryParam("prisonCode", PENTONVILLE)
+          .queryParam("latestStartDate", today())
+          .queryParam("activeOnly", true)
+          .queryParam("type", "UNKNOWN")
+          .build()
+      }
+      .accept(MediaType.APPLICATION_JSON)
+      .headers(setAuthorisation(roles = listOf("ROLE_PRISONER_PAY__PRISONER_PAY_UI")))
+      .exchange()
+      .fail(HttpStatus.BAD_REQUEST)
+  }
+
+  @Test
   fun `search returns unauthorized when no bearer token`() {
     searchPayStatusPeriods(includeBearerAuth = false).fail(HttpStatus.UNAUTHORIZED)
   }
@@ -169,6 +215,7 @@ class PayStatusPeriodIntegrationTest : IntegrationTestBase() {
     latestStartDate: LocalDate = today(),
     activeOnly: Boolean = true,
     prisonCode: String = PENTONVILLE,
+    type: PayStatusType? = null,
     username: String = USERNAME,
     roles: List<String> = listOf("ROLE_PRISONER_PAY__PRISONER_PAY_UI"),
     includeBearerAuth: Boolean = true,
@@ -180,6 +227,7 @@ class PayStatusPeriodIntegrationTest : IntegrationTestBase() {
         .queryParam("prisonCode", prisonCode)
         .queryParam("latestStartDate", latestStartDate)
         .queryParam("activeOnly", activeOnly)
+        .apply { type?.let { queryParam("type", it) } }
         .build()
     }
     .accept(MediaType.APPLICATION_JSON)
