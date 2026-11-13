@@ -78,6 +78,26 @@ class PrisonerPayApiClientTest {
   }
 
   @Test
+  fun `should retrieve pay status periods filtered by type`() = runTest {
+    val latestStartDate = today()
+
+    val payStatusPeriods = listOf(
+      payStatusPeriod(prisonerNumber = "A1111AA", type = PayStatusType.SHORT_TERM_SICK),
+    )
+
+    server.stubSearch(
+      latestStartDate = latestStartDate,
+      activeOnly = true,
+      type = PayStatusType.SHORT_TERM_SICK,
+      response = payStatusPeriods,
+    )
+
+    val result = client.search(PENTONVILLE, latestStartDate, true, PayStatusType.SHORT_TERM_SICK)
+
+    assertThat(result).isEqualTo(payStatusPeriods)
+  }
+
+  @Test
   fun `should retrieve pay rates`() = runTest {
     val today: LocalDate = LocalDate.now(clock)
     val payRates = listOf(
