@@ -23,7 +23,7 @@ class PrisonerPayServiceTest {
   val prisonerPayService = PrisonerPayService(prisonerPayApiClient, prisonerSearchClient)
 
   @Test
-  fun `should return pay the status period by id`() = runTest {
+  fun `should return the pay status period by id`() = runTest {
     val payStatusPeriod = payStatusPeriod()
     val prisoner = prisoner()
 
@@ -48,6 +48,20 @@ class PrisonerPayServiceTest {
         createdDateTime = payStatusPeriod.createdDateTime,
       ),
     )
+  }
+
+  @Test
+  fun `should pass type filter to the client when searching`() = runTest {
+    val latestStartDate = today()
+    val payStatusPeriods = listOf(payStatusPeriod(prisonerNumber = "A1111AA", type = PayStatusType.SHORT_TERM_SICK))
+
+    whenever(prisonerPayApiClient.search(PENTONVILLE, latestStartDate, true, PayStatusType.SHORT_TERM_SICK)).thenReturn(payStatusPeriods)
+    whenever(prisonerSearchClient.findByPrisonerNumbers(setOf("A1111AA"))).thenReturn(listOf(prisoner(prisonerNumber = "A1111AA")))
+
+    val result = prisonerPayService.search(PENTONVILLE, PayStatusType.SHORT_TERM_SICK, latestStartDate, true)
+
+    assertThat(result).hasSize(1)
+    assertThat(result[0].type).isEqualTo(PayStatusType.SHORT_TERM_SICK)
   }
 
   @Test
@@ -91,11 +105,11 @@ class PrisonerPayServiceTest {
       ),
     )
 
-    whenever(prisonerPayApiClient.search(PENTONVILLE, latestStartDate, true)).thenReturn(payStatusPeriods)
+    whenever(prisonerPayApiClient.search(PENTONVILLE, latestStartDate, true, null)).thenReturn(payStatusPeriods)
 
     whenever(prisonerSearchClient.findByPrisonerNumbers(payStatusPeriods.map { it.prisonerNumber }.toSet())).thenReturn(prisoners)
 
-    val result = prisonerPayService.search(PENTONVILLE, latestStartDate, true)
+    val result = prisonerPayService.search(PENTONVILLE, null, latestStartDate, true)
 
     assertThat(result).isEqualTo(
       listOf(

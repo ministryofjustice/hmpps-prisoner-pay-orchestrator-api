@@ -11,7 +11,7 @@ import java.util.*
 class PrisonerPayApiClient(private val prisonerPayWebClient: WebClient) {
   suspend fun getById(id: UUID): PayStatusPeriod = prisonerPayWebClient.get().uri("/pay-status-periods/$id").retrieve().awaitBody()
 
-  suspend fun search(prisonCode: String, latestStartDate: LocalDate, activeOnly: Boolean): List<PayStatusPeriod> = prisonerPayWebClient
+  suspend fun search(prisonCode: String, latestStartDate: LocalDate, activeOnly: Boolean, type: PayStatusType? = null): List<PayStatusPeriod> = prisonerPayWebClient
     .get()
     .uri { uriBuilder ->
       uriBuilder
@@ -19,6 +19,7 @@ class PrisonerPayApiClient(private val prisonerPayWebClient: WebClient) {
         .queryParam("prisonCode", prisonCode)
         .queryParam("latestStartDate", latestStartDate)
         .queryParam("activeOnly", activeOnly)
+        .apply { type?.let { queryParam("type", it) } }
         .build()
     }
     .retrieve()
@@ -55,4 +56,5 @@ data class PayRate(
 
 enum class PayStatusType {
   LONG_TERM_SICK,
+  SHORT_TERM_SICK,
 }
